@@ -1,0 +1,10 @@
+langgraph
+langchain-core
+langchain-community
+langchain-openai
+pypdf
+praw
+langchain-anthropic
+bs4
+scikit-learn
+tavily-python
