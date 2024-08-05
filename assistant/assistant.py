@@ -63,6 +63,10 @@ comments = submission.comments.list()
 # Concatenate comments into a single string
 ANALYST_TOPIC_GENERATION_CONTEXT = "\n *** user commnent *** \n".join([comment.body for comment in comments])
 
+# Mark Zuckerberg's blog post as an alternative source
+url = "https://about.fb.com/news/2024/07/open-source-ai-is-the-path-forward/"
+ANALYST_TOPIC_GENERATION_CONTEXT_BLOG = WebBaseLoader(url).load()
+
 # 3) Content for expert 
 
 # Full llama3.1 paper
@@ -198,15 +202,15 @@ gen_perspectives_prompt = ChatPromptTemplate.from_messages(
             
             3. Think carefully about the documents.
             
-            4. Determine the most interesting themes and questions for research from the documents. 
+            4. Identify the most interesting themes for further research from the documents. 
             
-            5. Assign AI analyst persona to each themes and / or question. 
+            5. Assign an AI analyst persona to each of the indentified themes. 
             
             6. Choose the top {max_analysts} themes. The maximum number of personas you should create is:
             
             {max_analysts}
             
-            6. If the user has specified any analyst personas they want included, incorporate them into your set of analysts. 
+            7. If the user has specified any analyst personas they want included, incorporate them into your set of analysts. 
             
             Here is the user's optional input: {analyst_feedback}            
             """,
@@ -225,7 +229,7 @@ def generate_analysts(state: ResearchGraphState):
 
     # Generate analysts
     gen_perspectives_chain = gen_perspectives_prompt | llm.with_structured_output(Perspectives)
-    perspectives = gen_perspectives_chain.invoke({"documents": ANALYST_TOPIC_GENERATION_CONTEXT, 
+    perspectives = gen_perspectives_chain.invoke({"documents": ANALYST_TOPIC_GENERATION_CONTEXT_BLOG, 
                                                   "topic": topic, 
                                                   "analyst_feedback": analyst_feedback, 
                                                   "max_analysts": max_analysts})
@@ -422,40 +426,48 @@ report_gen_prompt = ChatPromptTemplate.from_messages(
         (
             "system",
             
-            """You are an expert technical analyst, writer, and editor. You will be given an interview.
-
-            You will turn this interview into a short easily digestible article following these guidelines:
-
-            1. Carefully analyze the content of the interview. 
-
-            2. Use markdown ## header for the report title.
-
-            3. Use markdown ### header for the first section of the report and call this "Context".
-
-            4. In the "Context" section, setup the primary insight or surprise.
-
-            - Give context on the problem, insight, or surprise that the interview uncovered
-
-            - Give some examples of previous ways people have tried to address the problem
-
-            - And / or give examples of ways people previously thought about the issue
-
-            5. Use markdown ### header for the second section of the report and call this "Why this is interesting".
-
-            6. In the "Why this is interesting" section, lay out the the insight or surprise that the interview uncovered. 
-
-            - Focus on what is non-obvious: Include insights from the interview that are surprising.
+            """You are tasked with generating a short summary of a technical interview. 
             
-            - Focus on what is specific: Avoid generalities and include specific examples from the interview.
+            Your summary should focus on two main aspects:
+            
+            1. The historical context, past ways of thinking about the problem, or prior approaches
+            
+            2. What is new, novel, and interesting about the approaches discussed in the conversation, especially if they diverge from conventional wisdom
 
-            7. Do not mention the names of the interviewers or expert in your report.
+            Please follow these steps to create your summary:
+
+            1. Carefully read and analyze the provided technical interview.
+
+            2. Identify the historical context, past approaches, or conventional wisdom related to the topic discussed. Use you general knowledge and look for mentions of these in the interview:
+            - Previous methods or technologies
+            - Traditional ways of thinking about the problem
+            - Established practices or theories in the field
+
+            3. Determine what is new, novel, or interesting about the approach discussed in the interview. Pay attention to:
+            - Innovative ideas or methodologies
+            - Unconventional solutions or perspectives
+            - Improvements or advancements over existing approaches
+
+            4. Use markdown ## header for the summary title, and create an engaging title for the summary.
+
+            5. Use markdown ### header for the first section of the report and call this "Context".
+
+            6. In the "Context" section, summarize the historical context, past approaches, or conventional wisdom related to the topic discussed.
+
+            7. Use markdown ### header for the second section of the report and call this "Why Is This Interesting?".
+
+            8. In the "Why Is This Interesting?" section, summarize what is new, novel, or interesting about the approach discussed in the interview. 
+
+            9. Do not mention the names of the interviewers or expert in your report.
                            
-            8. If editor feedback is provided, incorporate those points seamlessly into your report.
+            10. If editor feedback is provided, incorporate those points seamlessly into your report.
+
+            11. Remember to focus on the most significant points and provide a clear contrast between the historical context and the novel approach discussed in the conversation.
             
-            9. Aim for ~250 words maximum for your short short easily digestible article.""",
+            12. Aim for ~300 words maximum.""",
         
         ),
-        ("human", """Here are the interviews conducted with experts on this topic:
+        ("human", """Here are the interviews to summarize:
                         <interviews>
                         {interviews}
                         </interviews>
@@ -605,7 +617,13 @@ def write_report(state: ResearchGraphState):
                 
                 """Your goal is to first analyze a short report, which is in markdown.
 
-                Then, re-format it in Slack blocks so that it can be written to the Slack API.
+                The report title will have ## header.
+
+                The report will have two sections, each with ### header. 
+                
+                The first section will be titled "Context" and the second section will be titled "Why Is This Interesting?".
+
+                Re-format these sections as Slack blocks so that it can be written to the Slack API.
             
                 Be sure to include divider blocks between each section of the report.""",
             
@@ -663,4 +681,6 @@ builder.add_edge("write_report", END)
 memory = SqliteSaver.from_conn_string(save_db_path)
 
 # Compile
-graph = builder.compile(checkpointer=memory, interrupt_before=["generate_analysts","write_report"],)
+# Interrupt after generate_analysts to see if we want to modify any personas
+# Interrupt before write_report to see if we want to write the reports to Slack
+graph = builder.compile(checkpointer=memory, interrupt_after=["generate_analysts"], interrupt_before=["write_report"],)

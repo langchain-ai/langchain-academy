@@ -5,7 +5,9 @@
     "."
   ],
   "graphs": {
-    "research_assistant": "./assistant.py:graph"
+    "research_assistant": "./assistant.py:graph",
+    "chain": "./chain.py:graph",
+    "agent": "./agent.py:graph"
   },
   "env": "./.env"
 }
