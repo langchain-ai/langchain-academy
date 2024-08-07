@@ -196,23 +196,23 @@ gen_perspectives_prompt = ChatPromptTemplate.from_messages(
             
             {topic}
             
-            2. Carefully read and analyze the following documents related to the topic:
+            2. Examine any documents that have been optionally provided to guide creation of the analysts:
             
             {documents}
+
+            3. Examine any editorial feedback that has been optionally provided to guide creation of the analysts: 
             
-            3. Think carefully about the documents.
+            {analyst_feedback}  
             
-            4. Identify the most interesting themes for further research from the documents. 
+            4. Think carefully about anything provided about to guide analst creation related to the research topic.
             
-            5. Assign an AI analyst persona to each of the indentified themes. 
+            5. Determine the most interesting themes and questions. 
             
-            6. Choose the top {max_analysts} themes. The maximum number of personas you should create is:
+            6. Assign AI analyst persona to each themes and / or question. 
+            
+            7. Choose the top {max_analysts} themes. The maximum number of personas you should create is:
             
             {max_analysts}
-            
-            7. If the user has specified any analyst personas they want included, incorporate them into your set of analysts. 
-            
-            Here is the user's optional input: {analyst_feedback}            
             """,
             
         ),
