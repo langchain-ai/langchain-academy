@@ -6,8 +6,6 @@ from typing import List, Optional, Union
 from typing import Annotated
 from typing_extensions import TypedDict
 
-import praw
-
 from langchain_community.document_loaders import PyPDFLoader, WebBaseLoader
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_community.vectorstores import SKLearnVectorStore
@@ -19,14 +17,13 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import chain as as_runnable
 
-
-
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_anthropic import ChatAnthropic
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.constants import Send
+from langgraph.channels import Topic
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 
@@ -41,31 +38,13 @@ save_db_path = "state_db/assistant.db"
 slack_bot_url = os.getenv('LANCE_BOT_SLACK_URL')
 
 # Max turns for interviews 
-max_num_turns = 6
+max_num_turns = 3
 
 # 2) Commentary to create analysts 
 
-# Reddit creds
-reddit_client_id = os.getenv('REDDIT_CLIENT_ID')
-reddit_client_secret = os.getenv('REDDIT_CLIENT_SECRET')
-
-# URL of the Reddit post
-url = 'https://www.reddit.com/r/LocalLLaMA/comments/1eabf4l/lets_discuss_llama31_paper_a_lot_of_details_on/'
-
-# Initialize the Reddit instance
-reddit = praw.Reddit(client_id=reddit_client_id, client_secret=reddit_client_secret, user_agent='Local Llama Loader')
-
-# Fetch the submission and comments
-submission = reddit.submission(url=url)
-submission.comments.replace_more(limit=None)
-comments = submission.comments.list()
-
-# Concatenate comments into a single string
-ANALYST_TOPIC_GENERATION_CONTEXT = "\n *** user commnent *** \n".join([comment.body for comment in comments])
-
 # Mark Zuckerberg's blog post as an alternative source
 url = "https://about.fb.com/news/2024/07/open-source-ai-is-the-path-forward/"
-ANALYST_TOPIC_GENERATION_CONTEXT_BLOG = WebBaseLoader(url).load()
+ANALYST_TOPIC_GENERATION_CONTEXT = WebBaseLoader(url).load()
 
 # 3) Content for expert 
 
@@ -88,6 +67,10 @@ retriever = vectorstore.as_retriever(k=10)
 # Load a technical blog post from the web 
 url = "https://ai.meta.com/blog/meta-llama-3-1/"
 EXPERT_CONTEXT_BLOG = WebBaseLoader(url).load()
+
+# 4) Web search
+
+tavily_search = TavilySearchResults(max_results=4)
 
 ### --- State --- ###
 
@@ -119,14 +102,15 @@ class InterviewState(TypedDict):
     messages: Annotated[List[AnyMessage], add_messages]
     analyst: Analyst
     editor_feedback: str
-    interviews: list # This key is duplicated between "inner state" ...
-    reports: list # This key is duplicated between "inner state" ...
+    context: Annotated[list, Topic(typ=list, accumulate=True, unique=True)]
+    interviews: list
+    reports: list 
 
 # TODO: Remove topic and max_analysts this when the input type is supported in Studio
 class ResearchGraphState(TypedDict):
     analysts: List[Analyst]
-    interviews: Annotated[list, operator.add] # ... and "outer state"
-    reports: Annotated[list, operator.add] # ... and "outer state"
+    interviews: Annotated[list, operator.add] 
+    reports: Annotated[list, operator.add] 
     final_report: str
     analyst_feedback: str 
     editor_feedback: str 
@@ -204,16 +188,11 @@ gen_perspectives_prompt = ChatPromptTemplate.from_messages(
             
             {analyst_feedback}  
             
-            4. Think carefully about anything provided about to guide analst creation related to the research topic.
-            
-            5. Determine the most interesting themes and questions. 
-            
-            6. Assign AI analyst persona to each themes and / or question. 
-            
-            7. Choose the top {max_analysts} themes. The maximum number of personas you should create is:
-            
-            {max_analysts}
-            """,
+            4. Determine the most interesting themes based upon documents and / or feedback above.
+                        
+            5. Pick the top {max_analysts} themes.
+
+            6. Assign one analyst to each theme.""",
             
         ),
     ]
@@ -229,7 +208,7 @@ def generate_analysts(state: ResearchGraphState):
 
     # Generate analysts
     gen_perspectives_chain = gen_perspectives_prompt | llm.with_structured_output(Perspectives)
-    perspectives = gen_perspectives_chain.invoke({"documents": ANALYST_TOPIC_GENERATION_CONTEXT_BLOG, 
+    perspectives = gen_perspectives_chain.invoke({"documents": ANALYST_TOPIC_GENERATION_CONTEXT, 
                                                   "topic": topic, 
                                                   "analyst_feedback": analyst_feedback, 
                                                   "max_analysts": max_analysts})
@@ -244,13 +223,13 @@ gen_qn_prompt = ChatPromptTemplate.from_messages(
         (
             "system",
             
-            """You are an experienced analyst tasked with interviewing an expert to learn about a specific topic. 
+            """You are an analyst tasked with interviewing an expert to learn about a specific topic. 
 
-            Your goal is boil down to non-obvious and specific insights related to your topic:
+            Your goal is boil down to interesting and specific insights related to your topic.
 
-            1. Non-obvious: Insights that people will find surprising.
+            1. Interesting: Insights that people will find surprising or non-obvious.
             
-            2. Specific: Insights that avoid generalities and include specific examples from the exprt.
+            2. Specific: Insights that avoid generalities and include specific examples from the expert.
     
             Here is your topic of focus and set of goals: {persona}
             
@@ -295,31 +274,108 @@ def generate_question(state: InterviewState):
 
 ### --- Expert --- ###
 
+gen_search_query = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            
+            """You will be given a conversation between an analyst and an expert. 
+
+            Your goal is to generate a well-structured query for use in retrieval and / or web-search related to the conversation.
+            
+            First, analyze the full conversation.
+
+            Pay particular attention to the final question posed by the analyst.
+
+            Convert this final question into a well-structured query.""",
+            
+        ),
+        
+            MessagesPlaceholder(variable_name="messages", optional=True),
+        ]
+)
+
+# Schema 
+class SearchQuery(BaseModel):
+    search_query: str = Field(None, description="The search query to use.")
+
+# Query re-writing
+query_gen_chain = gen_search_query | llm.with_structured_output(SearchQuery)
+
+def retrieve_docs(state: InterviewState):
+    """ Retrieve docs from vectorstore """
+
+    # Get messages
+    messages = state['messages']
+
+    # Search query
+    search_query = query_gen_chain.invoke({'messages': messages})
+
+    # Retrieve
+    docs = retriever.invoke(search_query.search_query)
+
+    # Format
+    formatted_retrieved_docs = "\n\n---\n\n".join(
+        [
+            f'<Document source="{doc.metadata["source"]}" page="{doc.metadata.get("page", "")}"/>\n{doc.page_content}\n</Document>'
+            for doc in docs
+        ]
+    )
+
+    return {"context": [formatted_retrieved_docs]} 
+
+def search_web(state: InterviewState):
+    """ Retrieve docs from web search """
+
+    # Get messages
+    messages = state['messages']
+
+    # Search query
+    search_query = query_gen_chain.invoke({'messages': messages})
+
+    # Search
+    search_docs = tavily_search.invoke(search_query.search_query)
+
+     # Format
+    formatted_search_docs = "\n\n---\n\n".join(
+        [
+            f'<Document href="{doc["url"]}"/>\n{doc["content"]}\n</Document>'
+            for doc in search_docs
+        ]
+    )
+
+    return {"context": [formatted_search_docs]} 
+
 gen_expert_prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
             
-            """You are an expert on the topic of {topic}.
+            """You are an expert being interviewed by an analyst who focused on learning this topic: {topic}. 
             
-            You are being interviewed by an analyst who focused on learning about a specific topic. 
-            
-            Your goal is to share non-obvious and specific insights related to your topic:
+            You goal is to answer a question posed by the interviewer.
 
-            1. Non-obvious: Insights that people will find surprising and therefore interesting.
+            To answer question, use this context:
             
-            2. Specific: Insights that avoid generalities and include specific examples from the exprt.
-
-            Here is the context you should use to inform your answers:
             {context}
 
             When answering questions, follow these guidelines:
             
-            1. Use only the information provided in the context. Do not introduce external information or make assumptions beyond what is explicitly stated in the context.
-                     
-            2. If a question cannot be answered based on the given context, state that you don't have enough information to provide a complete answer.
+            1. Use only the information provided in the context. 
             
-            Remember, your ultimate goal is to help the analyst drill down to specific and non-obvious insights about the topic.""",
+            2. Do not introduce external information or make assumptions beyond what is explicitly stated in the context.
+
+            3. The context contain sources at the topic of each individual document.
+
+            4. Include these sources your answer next to any relevant statements. For example, for source # 1 use [1]. 
+
+            5. List your sources in order at the bottom of your answer. [1] Source 1, [2] Source 2, etc
+            
+            6. If the source is: <Document source="assistant/docs/llama3_1.pdf" page="7"/>' then just list: 
+            
+            [1] assistant/docs/llama3_1.pdf, page 7 
+            
+            And skip the addition of the brackets as well as the Document source preanble in your citation.""",
             
         ),
         
@@ -356,69 +412,6 @@ def generate_answer(state: InterviewState):
     # Append it to state
     return {"messages": [answer]}
 
-def reflect(state: InterviewState):
-
-    """ Reflect on the interview, assess whether web search is needed """
-
-    # Get messages state
-    messages = state['messages']
-
-    # Get query for reflection
-    gen_search_query = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                
-                """You will be given a conversation between an analyst and an expert. 
-                
-                Your task is to assess whether the expert's answers fully address the analyst's questions.
-                
-                And also your task is to determine if additional web search would be beneficial.
-    
-                Carefully analyze the conversation by following these steps:
-                1. Identify the main questions asked by the analyst.
-                2. Examine the expert's responses to each question.
-                3. Determine if any questions were left unanswered or only partially addressed.
-                4. Consider if there are any gaps in information or areas that could benefit from additional research.
-    
-                Based on your analysis, decide whether the conversation would benefit from an additional web search. 
-                
-                Output your decision as a single word, either 'yes' or 'no':
-                
-                If your decision is 'yes', complete the following additional steps:
-                1. Reflect on the conversation and identify the key topics or questions that were not fully addressed.
-                2. Generate a concise search query that would best capture the information needed to fill in the gaps.
-                3. Provide a brief explanation of your reasoning for suggesting a web search.""",
-                
-            ),
-            
-                MessagesPlaceholder(variable_name="messages", optional=True),
-            ]
-    )
-
-    # Schema 
-    class SearchQuery(BaseModel):
-        search: str = Field(..., description="Indicate whether to perform a search. Allowed values are 'yes' or 'no'.")
-        search_query: Optional[str] = Field(None, description="The search query to use if search is 'yes'.")
-        reasoning: Optional[str] = Field(None, description="Reasoning for performing additional search to supplement the interview.")
-
-    # Reflect
-    query_gen_chain = gen_search_query | llm.with_structured_output(SearchQuery)
-    result = query_gen_chain.invoke({'messages': messages})
-
-    # Perform web search
-    if result.search.lower() == 'yes':
-
-        # Search tool
-        web_search_tool = TavilySearchResults(k=3)
-        
-        # Get search results
-        search_results = web_search_tool.invoke(result.search_query)
-        formatted_search_results = "\n\n".join([f"Added web search result # {i}\n{search['content']}" for i, search in enumerate(search_results, start=1)])
-
-        # Append it to state
-        return {"messages": [AIMessage(content=formatted_search_results)]}
-
 ### --- Report Generation --- ###
 
 report_gen_prompt = ChatPromptTemplate.from_messages(
@@ -426,56 +419,70 @@ report_gen_prompt = ChatPromptTemplate.from_messages(
         (
             "system",
             
-            """You are tasked with generating a short summary of a technical interview. 
+            """You are an expert technical analyst, writer, and editor. 
             
-            Your summary should focus on two main aspects:
+            Your task is to create a short, easily digestible report based on a set of source documents.
+
+            1. Analyze the content of the source documents: 
+            - The name of each source document is at the start of the document, with the <Document tag.
             
-            1. The historical context, past ways of thinking about the problem, or prior approaches
+            2. Create a report structure using markdown formatting:
+               - Use ## for the report title
+               - Use ### for section headers
             
-            2. What is new, novel, and interesting about the approaches discussed in the conversation, especially if they diverge from conventional wisdom
+            3. Write the report following this structure:
+               a. Title (## header)
+               b. Summary (### header)
+               c. Sources (### header)
 
-            Please follow these steps to create your summary:
+            4. Make your title engaging based upon the focus area of the analyst: 
+            {description}
 
-            1. Carefully read and analyze the provided technical interview.
-
-            2. Identify the historical context, past approaches, or conventional wisdom related to the topic discussed. Use you general knowledge and look for mentions of these in the interview:
-            - Previous methods or technologies
-            - Traditional ways of thinking about the problem
-            - Established practices or theories in the field
-
-            3. Determine what is new, novel, or interesting about the approach discussed in the interview. Pay attention to:
-            - Innovative ideas or methodologies
-            - Unconventional solutions or perspectives
-            - Improvements or advancements over existing approaches
-
-            4. Use markdown ## header for the summary title, and create an engaging title for the summary.
-
-            5. Use markdown ### header for the first section of the report and call this "Context".
-
-            6. In the "Context" section, summarize the historical context, past approaches, or conventional wisdom related to the topic discussed.
-
-            7. Use markdown ### header for the second section of the report and call this "Why Is This Interesting?".
-
-            8. In the "Why Is This Interesting?" section, summarize what is new, novel, or interesting about the approach discussed in the interview. 
-
-            9. Do not mention the names of the interviewers or expert in your report.
-                           
-            10. If editor feedback is provided, incorporate those points seamlessly into your report.
-
-            11. Remember to focus on the most significant points and provide a clear contrast between the historical context and the novel approach discussed in the conversation.
+            4. For the summary section:
+            - Set up summary with general background / context related to description
+            - Emphasize what is novel, interesting, or surprising about insights gathered from the interview
+            - Create a numbered list of source documents, as you use them
+            - Do not mention the names of interviewers or experts
+            - Aim for approximately 400 words maximum
+            - Use numbered sources in your report (e.g., [1], [2]) based on information from source documents
             
-            12. Aim for ~300 words maximum.""",
+            5. Incorporate editor feedback seamlessly into your report, if provided.
+            
+            6. In the Sources section:
+               - Include all sources used in your report
+               - Provide full links to relevant websites or specific document paths
+               - Separate each source by a newline. Use two spaces at the end of each line to create a newline in Markdown.
+               - It will look like:
+
+                ### Sources
+                [1] Link or Document name
+                [2] Link or Document name
+
+            7. Be sure to combine sources. For example this is not correct:
+
+            [3] https://ai.meta.com/blog/meta-llama-3-1/
+            [4] https://ai.meta.com/blog/meta-llama-3-1/
+
+            There should be no redundant source. It should simply be:
+
+            [3] https://ai.meta.com/blog/meta-llama-3-1/
+            
+            8. Final review:
+               - Ensure the report follows the required structure
+               - Include no preamble before the title of the report
+               - Check that all guidelines have been followed""",
         
         ),
-        ("human", """Here are the interviews to summarize:
-                        <interviews>
-                        {interviews}
-                        </interviews>
-            
+        ("human", """Here are the materials you'll be working with:
+
+                        Overall focus on the analyst:
+                        {description}
+                        
+                        Source documents retrieved from an interview w/ an expert:
+                        {context}
+
                         Here is any editor feedback that should be incorporated into the report:
-                        <editor_feedback>
-                        {editor_feedback}
-                        </editor_feedback>"""),
+                        {editor_feedback}"""),
     ]
 )
 
@@ -484,17 +491,16 @@ def generate_report(state: InterviewState):
 
     # State 
     topic = state["topic"]
-    interviews = state["interviews"]
+    context = state["context"]
+    analyst = state["analyst"]
     editor_feedback = state.get("editor_feedback", [])
-
-    # Full set of interviews
-    formatted_str_interview = "\n\n".join([f"Interview # {i}\n{interview}" for i, interview in enumerate(interviews, start=1)])
 
     # Generate report
     report_gen_chain = report_gen_prompt | report_writer_llm | StrOutputParser()
-    report = report_gen_chain.invoke({"interviews": formatted_str_interview, 
-                                       "topic": topic,
-                                       "editor_feedback": editor_feedback})
+    report = report_gen_chain.invoke({"description": analyst.description, 
+                                      "context": context, 
+                                      "topic": topic,
+                                      "editor_feedback": editor_feedback})
     
     return {"reports": [report]}
 
@@ -516,7 +522,7 @@ def save_interview(state: InterviewState):
 def route_messages(state: InterviewState, 
                    name: str = "expert"):
 
-    """ Route between question and save interview (finish) """
+    """ Route between question and answer """
     
     # Get messages
     messages = state["messages"]
@@ -528,33 +534,34 @@ def route_messages(state: InterviewState,
 
     # End if expert has answered more than the max turns
     if num_responses >= max_num_turns:
-        return "reflect"
+        return 'save_interview'
 
-    # This router is perform after each question - answer pair 
+    # This router is run after each question - answer pair 
     # Get the last question asked to check if it signals the end of discussion
     last_question = messages[-2]
     
-    if "Thank you so much for your help!" in last_question.content:
-        return "reflect"
+    if "Thank you so much for your help" in last_question.content:
+        return 'save_interview'
     return "ask_question"
 
-# Add nodes and edges 
+# Add nodes and edges for the interview
 interview_builder = StateGraph(InterviewState)
 interview_builder.add_node("ask_question", generate_question)
+interview_builder.add_node("retrieve_docs", retrieve_docs)
+interview_builder.add_node("search_web", search_web)
 interview_builder.add_node("answer_question", generate_answer)
-interview_builder.add_node("reflect", reflect)
 interview_builder.add_node("save_interview", save_interview)
-interview_builder.add_node("generate_report", generate_report) 
+interview_builder.add_node("generate_report", generate_report)
 
-# Flow
+# Interview Flow
 interview_builder.add_edge(START, "ask_question")
-interview_builder.add_edge("ask_question", "answer_question")
-interview_builder.add_conditional_edges("answer_question", route_messages,["ask_question","reflect"])
-interview_builder.add_edge("reflect", "save_interview")
+interview_builder.add_edge("ask_question", "retrieve_docs")
+interview_builder.add_edge("ask_question", "search_web")
+interview_builder.add_edge("retrieve_docs", "answer_question")
+interview_builder.add_edge("search_web", "answer_question")
+interview_builder.add_conditional_edges("answer_question", route_messages,['ask_question','save_interview'])
 interview_builder.add_edge("save_interview", "generate_report")
 interview_builder.add_edge("generate_report", END)
-
-sub_graph = interview_builder.compile()
 
 ### --- Main Graph --- ###
 
@@ -569,9 +576,9 @@ def initiate_all_interviews(state: ResearchGraphState):
                                                    ]}) for analyst in state["analysts"]]
     
 def finalize_report(state: ResearchGraphState):
-    """ The is the "reduce" step where we gather all the sections, and combine them """
+    """ The is the "reduce" step where we gather reports from each interview, combine them, and add an introduction """
     
-     # Full set of interviews
+    # Full set of interviews
     sections = state["reports"]
 
     # Combine them
@@ -607,7 +614,7 @@ def finalize_report(state: ResearchGraphState):
     return {"final_report": report_intro + "\n\n" + formatted_str_sections}
 
 def write_report(state: ResearchGraphState):
-    """ Write the report to external service (Slack) """
+    """ Write the report to external service (e.g., Slack) """
     
     # Write to slack
     slack_fmt_promopt = ChatPromptTemplate.from_messages(
@@ -616,16 +623,14 @@ def write_report(state: ResearchGraphState):
                 "system",
                 
                 """Your goal is to first analyze a short report, which is in markdown.
-
-                The report title will have ## header.
-
-                The report will have two sections, each with ### header. 
-                
-                The first section will be titled "Context" and the second section will be titled "Why Is This Interesting?".
-
-                Re-format these sections as Slack blocks so that it can be written to the Slack API.
-            
-                Be sure to include divider blocks between each section of the report.""",
+    
+                Then, re-format it in Slack blocks so that it can be written to the Slack API.
+    
+                The section of the report will be: title, summary, sources.
+    
+                Make each section header bold. For example, *Summary* or *Sources*.
+    
+                Include divider blocks between each section of the report.""",
             
             ),
             ("human", """Here is the report to re-format: {report}"""),
@@ -633,10 +638,10 @@ def write_report(state: ResearchGraphState):
     )
 
     # Full set of interview reports
-    sections = state["reports"]
+    reports = state["reports"]
 
     # Write each section of the report indvidually 
-    for section_to_write in sections:
+    for section_to_write in reports:
     
         # Format the markdown as Slack blocks
         slack_fmt = slack_fmt_promopt | llm.with_structured_output(SlackBlock)
@@ -668,19 +673,21 @@ def write_report(state: ResearchGraphState):
 builder = StateGraph(ResearchGraphState)
 builder.add_node("generate_analysts", generate_analysts)
 builder.add_node("conduct_interview", interview_builder.compile())
-builder.add_node("finalize_report", finalize_report)
 builder.add_node("write_report", write_report)
+builder.add_node("finalize_report", finalize_report)
 
+# Flow 
 builder.add_edge(START, "generate_analysts")
 builder.add_conditional_edges("generate_analysts", initiate_all_interviews, ["conduct_interview"])
+builder.add_edge("conduct_interview", "write_report")
 builder.add_edge("conduct_interview", "finalize_report")
-builder.add_edge("finalize_report", "write_report")
 builder.add_edge("write_report", END)
+builder.add_edge("finalize_report", END)
 
 # Set memory
 memory = SqliteSaver.from_conn_string(save_db_path)
 
 # Compile
-# Interrupt after generate_analysts to see if we want to modify any personas
-# Interrupt before write_report to see if we want to write the reports to Slack
+# Interrupt after generate_analysts to see if we want to modify any of the personas
+# Interrupt before write_report to confirm / approve that we want to write the reports to Slack
 graph = builder.compile(checkpointer=memory, interrupt_after=["generate_analysts"], interrupt_before=["write_report"],)
