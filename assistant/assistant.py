@@ -2,6 +2,7 @@ import operator
 import os
 import time
 import requests
+import sqlite3
 from typing import List, Optional, Union
 from typing import Annotated
 from typing_extensions import TypedDict
@@ -685,7 +686,8 @@ builder.add_edge("write_report", END)
 builder.add_edge("finalize_report", END)
 
 # Set memory
-memory = SqliteSaver.from_conn_string(save_db_path)
+conn = sqlite3.connect(save_db_path, check_same_thread=False)
+memory = SqliteSaver(conn)
 
 # Compile
 # Interrupt after generate_analysts to see if we want to modify any of the personas

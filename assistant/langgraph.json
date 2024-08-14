@@ -7,7 +7,8 @@
   "graphs": {
     "research_assistant": "./assistant.py:graph",
     "chain": "./chain.py:graph",
-    "agent": "./agent.py:graph"
+    "agent": "./agent.py:graph",
+    "simple_graph": "./simple.py:graph"
   },
   "env": "./.env"
 }
