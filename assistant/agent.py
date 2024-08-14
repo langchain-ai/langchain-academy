@@ -1,7 +1,7 @@
 from typing import Annotated, List
 from typing_extensions import TypedDict
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnableConfig
+from langchain_core.messages import SystemMessage
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph.message import AnyMessage, add_messages
@@ -41,6 +41,9 @@ def divide(a: int, b: int) -> float:
 
 tools = [add, multiply, divide]
 
+# System message
+sys_msg = SystemMessage(content="You are a helpful assistant tasked with writing performing arithmatic on a set of inputs.")
+
 
 # State
 class MessagesState(TypedDict):
@@ -48,39 +51,32 @@ class MessagesState(TypedDict):
 
 # Assistant
 class Assistant:
-    def __init__(self, runnable: Runnable):
+    def __init__(self, llm_with_tools):
         """
-        Initialize the Assistant with a runnable object.
+        Initialize the Assistant with llm.
         """
-        self.runnable = runnable
+        self.llm_with_tools = llm_with_tools
 
-    def __call__(self, state: MessagesState, config: RunnableConfig):
+    def __call__(self, state: MessagesState, config):
         """
         Call method to invoke
         """
-        result = self.runnable.invoke(state)  
+        # Get messages
+        messages = state['messages']
+        # Insert system prompt
+        messages.insert(0, sys_msg)
+        # Invoke chat model
+        result = self.llm_with_tools.invoke(messages)  
         return {"messages": result}
-
-# Assistant prompt
-primary_assistant_prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system",
-            " You are a helpful assistant tasked with writing performing arithmatic on a set of inputs. "
-         ),
-        ("placeholder", "{messages}"),
-    ]
-)
 
 # Prompt our LLM and bind tools
 llm = ChatOpenAI(model="gpt-4o")
-assistant_runnable = primary_assistant_prompt | llm.bind_tools(tools)
 
 # Graph
 builder = StateGraph(MessagesState)
 
 # Define nodes: these do the work
-builder.add_node("assistant", Assistant(assistant_runnable))
+builder.add_node("assistant", Assistant(llm.bind_tools(tools)))
 builder.add_node("tools", ToolNode(tools))
 
 # Define edges: these determine how the control flow moves
@@ -92,8 +88,8 @@ builder.add_conditional_edges(
     tools_condition,
 )
 builder.add_edge("tools", "assistant")
-# graph = builder.compile()
+graph = builder.compile()
 
 # Add a breakpoint 
-graph = builder.compile(interrupt_before=["tools"])
+# graph = builder.compile(interrupt_before=["tools"])
 
