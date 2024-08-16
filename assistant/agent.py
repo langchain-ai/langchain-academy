@@ -63,10 +63,8 @@ class Assistant:
         """
         # Get messages
         messages = state['messages']
-        # Insert system prompt
-        messages.insert(0, sys_msg)
         # Invoke chat model
-        result = self.llm_with_tools.invoke(messages)  
+        result = self.llm_with_tools.invoke([sys_msg]+messages)  
         return {"messages": result}
 
 # Prompt our LLM and bind tools
