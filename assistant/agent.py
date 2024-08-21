@@ -1,11 +1,9 @@
-from typing import Annotated, List
+from typing import Annotated
 from typing_extensions import TypedDict
-from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.messages import SystemMessage
 
-from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph.message import AnyMessage, add_messages
-from langgraph.graph import START, END, StateGraph
+from langgraph.graph import START, StateGraph
 from langgraph.prebuilt import tools_condition
 from langgraph.prebuilt import ToolNode
 
@@ -57,7 +55,7 @@ class Assistant:
         """
         self.llm_with_tools = llm_with_tools
 
-    def __call__(self, state: MessagesState, config):
+    def __call__(self, state: MessagesState):
         """
         Call method to invoke
         """
@@ -88,6 +86,6 @@ builder.add_conditional_edges(
 builder.add_edge("tools", "assistant")
 graph = builder.compile()
 
-# Add a breakpoint 
+# Add a breakpoint for human-in-the-loop
 # graph = builder.compile(interrupt_before=["tools"])
 

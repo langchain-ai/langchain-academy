@@ -2,7 +2,6 @@ import operator
 import os
 import time
 import requests
-import sqlite3
 from typing import List, Optional, Union
 from typing import Annotated
 from typing_extensions import TypedDict
@@ -685,11 +684,7 @@ builder.add_edge("conduct_interview", "finalize_report")
 builder.add_edge("write_report", END)
 builder.add_edge("finalize_report", END)
 
-# Set memory
-conn = sqlite3.connect(save_db_path, check_same_thread=False)
-memory = SqliteSaver(conn)
-
 # Compile
 # Interrupt after generate_analysts to see if we want to modify any of the personas
 # Interrupt before write_report to confirm / approve that we want to write the reports to Slack
-graph = builder.compile(checkpointer=memory, interrupt_after=["generate_analysts"], interrupt_before=["write_report"],)
+graph = builder.compile(interrupt_after=["generate_analysts"], interrupt_before=["write_report"],)

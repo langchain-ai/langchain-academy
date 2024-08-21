@@ -5,11 +5,9 @@
     "."
   ],
   "graphs": {
-    "research_assistant": "./assistant.py:graph",
-    "router": "./router.py:graph",
-    "agent": "./agent.py:graph",
     "simple_graph": "./simple.py:graph",
-    "chatbot": "./chatbot.py:graph"
+    "router": "./router.py:graph",
+    "agent": "./agent.py:graph"
   },
   "env": "./.env"
 }

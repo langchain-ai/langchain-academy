@@ -4,13 +4,13 @@ from langgraph.graph import StateGraph, START, END
 
 # State
 class State(TypedDict):
-    input: str
+    graph_state: str
 
 # Conditional edge
 def decide_mood(state) -> Literal["node_2", "node_3"]:
     
     # Often, we will use state to decide on the next node to visit
-    user_input = state['input'] 
+    user_input = state['graph_state'] 
     
     # Here, let's just do a 50 / 50 split between nodes 2, 3
     if random.random() < 0.5:
@@ -24,17 +24,17 @@ def decide_mood(state) -> Literal["node_2", "node_3"]:
 # Nodes
 def node_1(state):
     print("---Node 1---")
-    return {"input":state['input'] +" I am"}
+    return {"graph_state":state['graph_state'] +" I am"}
 
 
 def node_2(state):
     print("---Node 2---")
-    return {"input":state['input'] +" happy!"}
+    return {"graph_state":state['graph_state'] +" happy!"}
 
 
 def node_3(state):
     print("---Node 3---")
-    return {"input":state['input'] +" sad!"}
+    return {"graph_state":state['graph_state'] +" sad!"}
 
 # Build graph
 builder = StateGraph(State)
