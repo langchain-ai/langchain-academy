@@ -7,7 +7,8 @@
   "graphs": {
     "simple_graph": "./simple.py:graph",
     "router": "./router.py:graph",
-    "agent": "./agent.py:graph"
+    "agent": "./agent.py:graph",
+    "chatbot": "./chatbot.py:graph"
   },
   "env": "./.env"
 }
