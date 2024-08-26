@@ -67,7 +67,3 @@ builder.add_conditional_edges(
 )
 builder.add_edge("tools", "assistant")
 graph = builder.compile()
-
-# Add a breakpoint for human-in-the-loop
-# graph = builder.compile(interrupt_before=["tools"])
-
