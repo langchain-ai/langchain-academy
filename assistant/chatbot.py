@@ -3,8 +3,8 @@ from langgraph.graph import MessagesState
 from langgraph.graph import StateGraph, START, END
 
 # We will use this model for both the conversation and the summarization
-from langchain_anthropic import ChatAnthropic
-model = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0) 
+from langchain_openai import ChatOpenAI
+model = ChatOpenAI(model="gpt-4o", temperature=0) 
 
 class State(MessagesState):
     summary: str

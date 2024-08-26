@@ -8,4 +8,4 @@ langchain-anthropic
 bs4
 scikit-learn
 tavily-python
-langgraph-checkpoint-sqlite
+praw
