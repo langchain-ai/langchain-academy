@@ -8,4 +8,3 @@ langchain-anthropic
 bs4
 scikit-learn
 tavily-python
-praw
