@@ -9,7 +9,8 @@
     "router": "./router.py:graph",
     "agent": "./agent.py:graph",
     "chatbot": "./chatbot.py:graph",
-    "assistant": "./assistant.py:graph"
+    "assistant": "./assistant.py:graph",
+    "dynamic_breakpoints": "./dynamic_breakpoints.py:graph"
   },
   "env": "./.env"
 }
