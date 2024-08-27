@@ -1,4 +1,8 @@
-import os, operator, requests
+import os
+import operator
+import praw
+import requests
+
 from typing_extensions import TypedDict, List, Annotated
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
@@ -22,11 +26,6 @@ max_num_turns = 2
 # LLM
 llm = ChatOpenAI(model="gpt-4o", temperature=0) 
 
-### --- Context for experts --- ###
-
-import os
-import praw
-
 # Reddit creds
 reddit_client_id = os.getenv('REDDIT_CLIENT_ID')
 reddit_client_secret = os.getenv('REDDIT_CLIENT_SECRET')
@@ -35,6 +34,8 @@ reddit_client_secret = os.getenv('REDDIT_CLIENT_SECRET')
 reddit = praw.Reddit(client_id=reddit_client_id,
                      client_secret=reddit_client_secret,
                      user_agent='Fantasy Football Loader')
+
+### --- Data loaders --- ###
 
 def get_recent_reddit_posts(subreddit_name,
                             filter_to_use,
@@ -80,7 +81,7 @@ def get_reddit_post(url,
     
     # Load the comments
     post.comments.replace_more(limit=None) # Flatten the comment tree
-    
+
     # Initialize an empty string to store the output
     reddit_expert_context = ""
     reddit_expert_context += f"Title: {post.title}\n"
@@ -94,31 +95,6 @@ def get_reddit_post(url,
         reddit_expert_context += "="*50 + "\n\n"
 
     return reddit_expert_context
-
-# Replace with the subreddit you're interested in
-subreddit_name = 'fantasyfootball'
-
-# Get top comments from past <day, month, etc>
-filter_to_use = 'day'
-
-# Number of posts to gather
-number_of_posts = 5
-
-# Number of top comments to gather per post
-number_of_comments = 10
-
-reddit_recent_posts = get_recent_reddit_posts(subreddit_name,
-                                              filter_to_use,
-                                              number_of_posts,
-                                              number_of_comments)
-# Specific posts
-url = "https://www.reddit.com/r/fantasyfootball/comments/1ewk6kr/theres_only_one_draft_strategy_that_ill_ever/"
-number_of_comments = 20
-reddit_draft_strategy_context = get_reddit_post(url,number_of_comments)
-
-url = "https://www.reddit.com/r/fantasyfootball/comments/1espdv7/who_is_one_guy_you_arent_leaving_the_draft/"
-number_of_comments = 20
-reddit_top_player_context = get_reddit_post(url,number_of_comments)
 
 ### --- Graph state --- ###
 
@@ -151,6 +127,7 @@ class Takes(BaseModel):
 
 class OverallState(TypedDict):
     topic: str
+    contexts: dict
     experts: List[Expert]
     takes: Annotated[List[Take], operator.add]
 
@@ -161,32 +138,65 @@ class InterviewState(MessagesState):
 class InterviewOutputState(TypedDict):
      takes: List[Take]
 
-
 ### --- Graph --- ###
 
-@as_runnable
-def generate_experts(state: OverallState):
-
-    """ Generate our experts """
+def load_context(state: OverallState):
+    """ Generate our contexts from Reddit """
     
-    preamble = "You are an expert in in Fantasy Football. You are being interviewed by an analyst. Don't make up your own answers."
+    # Replace with the subreddit you're interested in
+    subreddit_name = 'fantasyfootball'
+    
+    # Get top comments from past <day, month, etc>
+    filter_to_use = 'day'
+    
+    # Number of posts to gather
+    number_of_posts = 5
+    
+    # Number of top comments to gather per post
+    number_of_comments = 10
+
+    # Pull recent posts 
+    reddit_recent_posts = get_recent_reddit_posts(subreddit_name,
+                                                  filter_to_use,
+                                                  number_of_posts,
+                                                  number_of_comments)
+    # Any specific posts to include
+    url = "https://www.reddit.com/r/fantasyfootball/comments/1ewk6kr/theres_only_one_draft_strategy_that_ill_ever/"
+    number_of_comments = 20
+    reddit_draft_strategy_context = get_reddit_post(url,number_of_comments)
+    
+    url = "https://www.reddit.com/r/fantasyfootball/comments/1espdv7/who_is_one_guy_you_arent_leaving_the_draft/"
+    number_of_comments = 20
+    reddit_top_player_context = get_reddit_post(url,number_of_comments)
+
+    return {"contexts": {"reddit_recent_posts":reddit_recent_posts,
+                        "reddit_draft_strategy_context": reddit_draft_strategy_context,
+                        "reddit_top_player_context": reddit_top_player_context}
+           }
+
+def generate_experts(state: OverallState):
+    """ Generate our experts """
+
+    contexts = state['contexts']
+    
+    preamble = "You are an expert in in Fantasy Football. You are being interviewed by an analyst. Only use the provided sources, don't make up your own answers."
     
     draft_strategy_expert = Expert(
         name="Moe",
         role="Fantasy Draft Strategy Expert",
-        context=SystemMessage(content=f"{preamble} Use only this information to answer questions from the analyst: {reddit_draft_strategy_context}"),
+        context=SystemMessage(content=f"{preamble} Use only this information to answer questions from the analyst: {contexts['reddit_draft_strategy_context']}"),
     )
     
     top_player_expert = Expert(
         name="Jimbo",
-        role="Top Players To Draft Expert",
-        context=SystemMessage(content=f"{preamble} Use only this information to answer questions from the analyst: {reddit_top_player_context}"),
+        role="Top Players To Draft Expert", 
+        context=SystemMessage(content=f"{preamble} Use only this information to answer questions from the analyst: {contexts['reddit_top_player_context']}"),
     )
 
     recent_events_expert = Expert(
         name="Barney",
-        role="Following recent news",
-        context=SystemMessage(content=f"{preamble} Use only this information to answer questions from the analyst: {reddit_recent_posts}"),
+        role="Following recent news", 
+        context=SystemMessage(content=f"{preamble} Use only this information to answer questions from the analyst: {contexts['reddit_recent_posts']}"),
     )
 
     return {"experts": [draft_strategy_expert, top_player_expert, recent_events_expert]}
@@ -349,32 +359,29 @@ def write_to_slack(state: OverallState):
             
             response = requests.post(slack_bot_url, headers=headers, json=data)
 
-### --- Interview graph --- ###
-
-# Add nodes and edges 
+# Add nodes and edges for interview 
 interview_builder = StateGraph(input=InterviewState, output=InterviewOutputState)
 interview_builder.add_node("ask_question", generate_question)
 interview_builder.add_node("answer_question", generate_answer)
 interview_builder.add_node("generate_takes", generate_takes)
 
-# Flow
+# Flow for interview
 interview_builder.add_edge(START, "ask_question")
 interview_builder.add_edge("ask_question", "answer_question")
 interview_builder.add_conditional_edges("answer_question", route_messages,['ask_question','generate_takes'])
 interview_builder.add_edge("generate_takes", END)
 
-### --- Overall graph --- ###
-
-# Add nodes and edges 
+# Add nodes and edges for overall graph
 overall_builder = StateGraph(OverallState)
 
-# Add nodes and edges 
+# Add nodes and edges for overall graph
+overall_builder.add_node("load_context", load_context)
 overall_builder.add_node("generate_experts", generate_experts)
 overall_builder.add_node("conduct_interview", interview_builder.compile())
 overall_builder.add_node("write_to_slack",write_to_slack)
 
-# Flow
-overall_builder.add_edge(START, "generate_experts")
+overall_builder.add_edge(START, "load_context")
+overall_builder.add_edge("load_context", "generate_experts")
 overall_builder.add_conditional_edges("generate_experts", initiate_all_interviews, ["conduct_interview"])
 overall_builder.add_edge("conduct_interview", "write_to_slack")
 overall_builder.add_edge("write_to_slack", END)
