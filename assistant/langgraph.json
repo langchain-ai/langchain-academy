@@ -10,6 +10,7 @@
     "agent": "./agent.py:graph",
     "chatbot": "./chatbot.py:graph",
     "assistant": "./assistant.py:graph",
+    "map_reduce": "./map_reduce.py:graph",
     "dynamic_breakpoints": "./dynamic_breakpoints.py:graph"
   },
   "env": "./.env"
