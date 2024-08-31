@@ -63,5 +63,5 @@ Some lessons (in Module 4) will use Tavily, but you can use other search tools.
 
 * Save this to the .env file 
 ```
-echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" > assistant/.env
+echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> assistant/.env
 ```
