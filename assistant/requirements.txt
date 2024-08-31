@@ -9,3 +9,4 @@ tavily-python
 wikipedia
 notebook
 langgraph-sdk
+langgraph-checkpoint-sqlite
