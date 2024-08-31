@@ -54,3 +54,14 @@ source ~/.zshrc
 
 * Download the latest `.dmg` file [here](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download)
 * Install Docker desktop for Mac [here](https://docs.docker.com/engine/install/)
+
+### Tavily for web search
+
+You can sign up for an API key [here](https://tavily.com/).
+
+Some lessons (in Module 4) will use Tavily, but you can use other search tools.
+
+* Save this to the .env file 
+```
+echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" > assistant/.env
+```
