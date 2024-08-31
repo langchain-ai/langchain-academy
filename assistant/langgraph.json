@@ -1,9 +1,5 @@
 {
-  "python_version": "3.11",
   "dockerfile_lines": [],
-  "dependencies": [
-    "."
-  ],
   "graphs": {
     "simple_graph": "./simple.py:graph",
     "router": "./router.py:graph",
@@ -15,5 +11,9 @@
     "parallelization": "./parallelization.py:graph",
     "sub_graphs": "./sub_graphs.py:graph"
   },
-  "env": "./.env"
+  "env": "./.env",
+  "python_version": "3.11",
+  "dependencies": [
+    "."
+  ]
 }

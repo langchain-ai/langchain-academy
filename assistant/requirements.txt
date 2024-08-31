@@ -8,3 +8,4 @@ scikit-learn
 tavily-python
 wikipedia
 notebook
+langgraph-sdk
