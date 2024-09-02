@@ -48,15 +48,15 @@ Tavily Search API is a search engine optimized for LLMs and RAG, aimed at effici
 * Add relevant API keys to .env files 
 ```
 $ cp module-1/studio/.env.example module-1/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-1/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-1/studio/.env
 
 $ cp module-2/studio/.env.example module-2/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-2/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-2/studio/.env
 
 $ cp module-3/studio/.env.example module-3/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-3/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-3/studio/.env
 
 $ cp module-4/studio/.env.example module-4/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-4/.env
-$ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" > module-4/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-4/studio/.env
+$ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" > module-4/studio/.env
 ```
