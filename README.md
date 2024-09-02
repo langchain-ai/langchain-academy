@@ -14,54 +14,49 @@ git clone https://github.com/langchain-ai/langchain-academy.git
 $ cd langchain-academy
 ```
 
-### Create an enviorment and install dependencies 
+### Create an environment and install dependencies  
 ```
 $ python3 -m venv lc-academy-env
 $ source lc-academy-env/bin/activate
-$ pip install -r assistant/requirements.txt
+$ pip install -r requirements.txt
 ```
 
-### Create a .env file 
-* Create a .env file for the relevant environment variables
+### Running notebooks
+Notebooks for each module are in the `module-` folders.
 ```
-cp assistant/.env.example assistant/.env
+$ jupyter notebook
 ```
 
 ### Set OpenAI API key
-
 * If you don't have an OpenAI API key, you can sign up [here](https://openai.com/index/openai-api/).
-* Append the `OPENAI_API_KEY` to your shell configuration (e.g., `~/.zshrc`)
-```
-echo 'export OPENAI_API_KEY="your-api-key-here"' >> ~/.zshrc
-source ~/.zshrc
-```
-* Save this to the .env file 
-```
-echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > assistant/.env
-```
+*  Set `OPENAI_API_KEY` in your environment 
 
 ### Sign up for LangSmith
 
 * Sign up [here](https://docs.smith.langchain.com/) 
-* Append the  to your shell configuration (e.g., `~/.zshrc`)
-```
-echo 'export LANGCHAIN_API_KEY="your-api-key-here"' >> ~/.zshrc
-echo 'export LANGCHAIN_TRACING_V2=true' >> ~/.zshrc
-source ~/.zshrc
-```
-
-### Set up LangGraph Studio (only macOS support)
-
-* Download the latest `.dmg` file [here](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download)
-* Install Docker desktop for Mac [here](https://docs.docker.com/engine/install/)
+*  Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in your environment 
 
 ### Tavily for web search
 
-You can sign up for an API key [here](https://tavily.com/).
+Tavily Search API is a search engine optimized for LLMs and RAG, aimed at efficient, quick, and persistent search results. You can sign up for an API key [here](https://tavily.com/). It's easy to sign up and offers a generous free tier. Some lessons (in Module 4) will use Tavily. Set `TAVILY_API_KEY` in your environment.
 
-Some lessons (in Module 4) will use Tavily, but you can use other search tools.
+### Set up LangGraph Studio
 
-* Save this to the .env file 
+* Current Studio only has macOS support
+* Download the latest `.dmg` file [here](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download)
+* Install Docker desktop for Mac [here](https://docs.docker.com/engine/install/)
+* Add relevant API keys to .env files 
 ```
-echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> assistant/.env
+$ cp module-1/studio/.env.example module-1/studio/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-1/.env
+
+$ cp module-2/studio/.env.example module-2/studio/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-2/.env
+
+$ cp module-3/studio/.env.example module-3/studio/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-3/.env
+
+$ cp module-4/studio/.env.example module-4/studio/.env
+$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-4/.env
+$ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" > module-4/.env
 ```

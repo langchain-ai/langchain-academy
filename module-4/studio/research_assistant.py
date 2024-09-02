@@ -1,6 +1,7 @@
 import operator
 from typing import Annotated, List, TypedDict
 
+from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, get_buffer_string
 from langchain_openai import ChatOpenAI
 from langgraph.constants import Send
@@ -13,8 +14,6 @@ llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
 ### Search tools
 from langchain_community.document_loaders import WikipediaLoader
-from langchain_community.tools.tavily_search import TavilySearchResults
-tavily_search = TavilySearchResults(max_results=3)
 
 ### Schema 
 class Analyst(BaseModel):
@@ -155,6 +154,9 @@ Convert this final question into a well-structured web search query""")
 def search_web(state: InterviewState):
     
     """ Retrieve docs from web search """
+
+    # Search
+    tavily_search = TavilySearchResults(max_results=3)
 
     # Search query
     structured_llm = llm.with_structured_output(SearchQuery)

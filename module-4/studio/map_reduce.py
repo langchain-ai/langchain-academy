@@ -9,7 +9,7 @@ from langgraph.constants import Send
 from langgraph.graph import END, StateGraph, START
 
 # Prompts we will use
-subjects_prompt = """Generate a comma separated list of between 2 and 5 examples related to: {topic}."""
+subjects_prompt = """Generate a list of 3 sub-topics that are all related to this overall topic: {topic}."""
 joke_prompt = """Generate a joke about {subject}"""
 best_joke_prompt = """Below are a bunch of jokes about {topic}. Select the best one! Return the ID of the best one, starting 0 as the ID for the first joke. Jokes: \n\n  {jokes}"""
 

@@ -20,8 +20,6 @@ class State(TypedDict):
     answer: str
     context: Annotated[list, operator.add]
 
-
-
 def search_web(state):
     
     """ Retrieve docs from web search """
