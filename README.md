@@ -58,5 +58,5 @@ $ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-3/studio/.env
 
 $ cp module-4/studio/.env.example module-4/studio/.env
 $ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-4/studio/.env
-$ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" > module-4/studio/.env
+$ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
 ```

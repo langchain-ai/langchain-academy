@@ -1,19 +1,16 @@
 import operator
+from pydantic import BaseModel, Field
 from typing import Annotated, List, TypedDict
 
+from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, get_buffer_string
 from langchain_openai import ChatOpenAI
 from langgraph.constants import Send
 from langgraph.graph import END, MessagesState, START, StateGraph
-from pydantic import BaseModel, Field
-from typing_extensions import TypedDict
 
 ### LLM
 llm = ChatOpenAI(model="gpt-4o", temperature=0) 
-
-### Search tools
-from langchain_community.document_loaders import WikipediaLoader
 
 ### Schema 
 class Analyst(BaseModel):
