@@ -45,18 +45,17 @@ Tavily Search API is a search engine optimized for LLMs and RAG, aimed at effici
 * Current Studio only has macOS support
 * Download the latest `.dmg` file [here](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download)
 * Install Docker desktop for Mac [here](https://docs.docker.com/engine/install/)
-* Add relevant API keys to .env files 
+
+### Running Studio
+Graphs for studio are in the `module-x/studio/` folders.
+
+* To use Studio, you will need to create a .env file with the relevant API keys
+* Run this from the command line to create these files:
 ```
-$ cp module-1/studio/.env.example module-1/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-1/studio/.env
+$ for i in {1..4}; do
+  cp module-$i/studio/.env.example module-$i/studio/.env
+  echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-$i/studio/.env
+done
+echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
 
-$ cp module-2/studio/.env.example module-2/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-2/studio/.env
-
-$ cp module-3/studio/.env.example module-3/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-3/studio/.env
-
-$ cp module-4/studio/.env.example module-4/studio/.env
-$ echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-4/studio/.env
-$ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
 ```
