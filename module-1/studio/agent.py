@@ -1,10 +1,8 @@
 from langchain_core.messages import SystemMessage
+from langchain_openai import ChatOpenAI
 
 from langgraph.graph import START, StateGraph, MessagesState
-from langgraph.prebuilt import tools_condition
-from langgraph.prebuilt import ToolNode
-
-from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import tools_condition, ToolNode
 
 def add(a: int, b: int) -> int:
     """Adds a and b.
@@ -24,7 +22,6 @@ def multiply(a: int, b: int) -> int:
     """
     return a * b
 
-
 def divide(a: int, b: int) -> float:
     """Adds a and b.
 
@@ -36,25 +33,21 @@ def divide(a: int, b: int) -> float:
 
 tools = [add, multiply, divide]
 
-# LLM and bind tools
+# Define LLM with bound tools
 llm = ChatOpenAI(model="gpt-4o")
 llm_with_tools = llm.bind_tools(tools)
 
 # System message
-sys_msg = SystemMessage(content="You are a helpful assistant tasked with writing performing arithmatic on a set of inputs.")
+sys_msg = SystemMessage(content="You are a helpful assistant tasked with writing performing arithmetic on a set of inputs.")
 
 # Node
 def assistant(state: MessagesState):
    return {"messages": [llm_with_tools.invoke([sys_msg] + state["messages"])]}
 
-# Graph
+# Build graph
 builder = StateGraph(MessagesState)
-
-# Define nodes: these do the work
 builder.add_node("assistant", assistant)
 builder.add_node("tools", ToolNode(tools))
-
-# Define edges: these determine how the control flow moves
 builder.add_edge(START, "assistant")
 builder.add_conditional_edges(
     "assistant",
@@ -63,4 +56,6 @@ builder.add_conditional_edges(
     tools_condition,
 )
 builder.add_edge("tools", "assistant")
+
+# Compile graph
 graph = builder.compile()

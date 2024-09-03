@@ -17,11 +17,6 @@ def multiply(a: int, b: int) -> int:
 llm = ChatOpenAI(model="gpt-4o")
 llm_with_tools = llm.bind_tools([multiply])
 
-# State
-class State(MessagesState):
-    # Add any keys needed beyond messages, which is pre-built 
-    pass
-
 # Node
 def tool_calling_llm(state: MessagesState):
     return {"messages": [llm_with_tools.invoke(state["messages"])]}
@@ -38,4 +33,6 @@ builder.add_conditional_edges(
     tools_condition,
 )
 builder.add_edge("tools", END)
+
+# Compile graph
 graph = builder.compile()
