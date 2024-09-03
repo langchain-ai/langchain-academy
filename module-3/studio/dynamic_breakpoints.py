@@ -1,5 +1,4 @@
 from typing import TypedDict
-from langgraph.checkpoint.memory import MemorySaver
 from langgraph.errors import NodeInterrupt
 from langgraph.graph import START, END, StateGraph
 
@@ -31,5 +30,4 @@ builder.add_edge("step_1", "step_2")
 builder.add_edge("step_2", "step_3")
 builder.add_edge("step_3", END)
 
-# Compile the graph with memory
 graph = builder.compile()
