@@ -6,13 +6,16 @@ from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, get_buffer_string
 from langchain_openai import ChatOpenAI
+
 from langgraph.constants import Send
 from langgraph.graph import END, MessagesState, START, StateGraph
 
 ### LLM
+
 llm = ChatOpenAI(model="gpt-4o", temperature=0) 
 
 ### Schema 
+
 class Analyst(BaseModel):
     affiliation: str = Field(
         description="Primary affiliation of the analyst.",
@@ -105,6 +108,7 @@ def human_feedback(state: GenerateAnalystsState):
     """ No-op node that should be interrupted on """
     pass
 
+# Generate analyst question
 question_instructions = """You are an analyst tasked with interviewing an expert to learn about a specific topic. 
 
 Your goal is boil down to interesting and specific insights related to your topic.
@@ -124,6 +128,7 @@ When you are satisfied with your understanding, complete the interview with: "Th
 Remember to stay in character throughout your response, reflecting the persona and goals provided to you."""
 
 def generate_question(state: InterviewState):
+
     """ Node to generate a question """
 
     # Get state
@@ -194,6 +199,7 @@ def search_wikipedia(state: InterviewState):
 
     return {"context": [formatted_search_docs]} 
 
+# Generate expert answer
 answer_instructions = """You are an expert being interviewed by an analyst.
 
 Here is analyst area of focus: {goals}. 
@@ -280,6 +286,7 @@ def route_messages(state: InterviewState,
         return 'save_interview'
     return "ask_question"
 
+# Write a summary (section of the final report) of the interview
 section_writer_instructions = """You are an expert technical writer. 
             
 Your task is to create a short, easily digestible section of a report based on a set of source documents.
@@ -333,7 +340,7 @@ There should be no redundant sources. It should simply be:
 
 def write_section(state: InterviewState):
 
-    """ Node to answer a question """
+    """ Node to write a section """
 
     # Get state
     interview = state["interview"]
@@ -367,7 +374,8 @@ interview_builder.add_edge("save_interview", "write_section")
 interview_builder.add_edge("write_section", END)
 
 def initiate_all_interviews(state: ResearchGraphState):
-    """ This is the "map" step where we run each interview sub-graph using Send API """    
+
+    """ Conditional edge to initiate all interviews via Send() API or return to create_analysts """    
 
     # Check if human feedback
     human_analyst_feedback=state.get('human_analyst_feedback','approve')
@@ -385,6 +393,7 @@ def initiate_all_interviews(state: ResearchGraphState):
                                            )
                                                        ]}) for analyst in state["analysts"]]
 
+# Write a report based on the interviews
 report_writer_instructions = """You are a technical writer creating a report on this overall topic: 
 
 {topic}
@@ -420,6 +429,9 @@ Here are the memos from your analysts to build your report from:
 {context}"""
 
 def write_report(state: ResearchGraphState):
+
+    """ Node to write the final report body """
+
     # Full set of sections
     sections = state["sections"]
     topic = state["topic"]
@@ -432,6 +444,7 @@ def write_report(state: ResearchGraphState):
     report = llm.invoke([SystemMessage(content=system_message)]+[HumanMessage(content=f"Write a report based upon these memos.")]) 
     return {"content": report.content}
 
+# Write the introduction or conclusion
 intro_conclusion_instructions = """You are a technical writer finishing a report on {topic}
 
 You will be given all of the sections of the report.
@@ -455,6 +468,9 @@ For your conclusion, use ## Conclusion as the section header.
 Here are the sections to reflect on for writing: {formatted_str_sections}"""
 
 def write_introduction(state: ResearchGraphState):
+
+    """ Node to write the introduction """
+
     # Full set of sections
     sections = state["sections"]
     topic = state["topic"]
@@ -469,6 +485,9 @@ def write_introduction(state: ResearchGraphState):
     return {"introduction": intro.content}
 
 def write_conclusion(state: ResearchGraphState):
+
+    """ Node to write the conclusion """
+
     # Full set of sections
     sections = state["sections"]
     topic = state["topic"]
@@ -483,7 +502,9 @@ def write_conclusion(state: ResearchGraphState):
     return {"conclusion": conclusion.content}
 
 def finalize_report(state: ResearchGraphState):
+
     """ The is the "reduce" step where we gather all the sections, combine them, and reflect on them to write the intro/conclusion """
+
     # Save full final report
     content = state["content"]
     if content.startswith("## Insights"):

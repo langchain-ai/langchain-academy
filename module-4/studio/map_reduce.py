@@ -63,4 +63,6 @@ graph_builder.add_edge(START, "generate_topics")
 graph_builder.add_conditional_edges("generate_topics", continue_to_jokes, ["generate_joke"])
 graph_builder.add_edge("generate_joke", "best_joke")
 graph_builder.add_edge("best_joke", END)
+
+# Compile the graph
 graph = graph_builder.compile()

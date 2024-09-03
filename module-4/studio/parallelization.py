@@ -15,7 +15,6 @@ from langgraph.graph import StateGraph, START, END
 llm = ChatOpenAI(model="gpt-4o", temperature=0) 
 
 class State(TypedDict):
-    # Apped from sources
     question: str
     answer: str
     context: Annotated[list, operator.add]
