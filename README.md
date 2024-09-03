@@ -2,9 +2,7 @@
 
 ## Introduction
 
-Welcome to LangChain Academy! This course is dedicated to exploring foundational concepts within the LangChain ecosystem, beginning with LangGraph. Throughout the course, we’ll build a strong understanding of LangGraph through a series of progressively detailed modules, each focusing on a specific theme. 
-
-For each module, we’re providing accompanying notebooks, which can be found in the designated folders below, and videos to guide you through each topic. In the `assistants` subdirectory, you’ll discover a collection of graphs that will be utilized with the LangGraph API and Studio throughout the modules.
+Welcome to LangChain Academy! This is a growing set of modules focused on foundational concepts within the LangChain ecosystem. Modules 1 - 4 focus on LangGraph, starting with the basics and progressively adding more advanced themes. In each module folder, you'll see a set of notebooks. A video accompanies each notebook to guide you through the topic. Each module also has a `studio` subdirectory, with a set of relevant graphs that we will explore using the LangGraph API and Studio.
 
 ## Setup
 
@@ -42,7 +40,7 @@ Tavily Search API is a search engine optimized for LLMs and RAG, aimed at effici
 
 ### Set up LangGraph Studio
 
-* Current Studio only has macOS support
+* Currently Studio only has macOS support
 * Download the latest `.dmg` file [here](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download)
 * Install Docker desktop for Mac [here](https://docs.docker.com/engine/install/)
 
