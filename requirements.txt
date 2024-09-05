@@ -8,3 +8,6 @@ langchain-openai
 notebook
 tavily-python
 wikipedia
+espn_api
+praw
+langchain-anthropic
