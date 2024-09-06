@@ -387,7 +387,6 @@ def initiate_all_interviews(state: ResearchGraphState):
     else:
         topic = state["topic"]
         return [Send("conduct_interview", {"analyst": analyst,
-                                           "topic": topic,
                                            "messages": [HumanMessage(
                                                content=f"So you said you were writing an article on {topic}?"
                                            )
