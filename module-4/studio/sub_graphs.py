@@ -1,5 +1,6 @@
 from operator import add
-from typing import List, TypedDict, Optional, Annotated
+from typing import List, Optional, Annotated
+from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 
 # The structure of the logs

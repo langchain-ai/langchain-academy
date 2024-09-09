@@ -1,5 +1,6 @@
 import random 
-from typing import TypedDict, Literal
+from typing import Literal
+from typing_extensions import TypedDict
 from langgraph.graph import StateGraph, START, END
 
 # State
