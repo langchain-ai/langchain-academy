@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing_extensions import TypedDict
 from langgraph.errors import NodeInterrupt
 from langgraph.graph import START, END, StateGraph
 

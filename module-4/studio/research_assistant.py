@@ -1,6 +1,7 @@
 import operator
 from pydantic import BaseModel, Field
-from typing import Annotated, List, TypedDict
+from typing import Annotated, List
+from typing_extensions import TypedDict
 
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools.tavily_search import TavilySearchResults
