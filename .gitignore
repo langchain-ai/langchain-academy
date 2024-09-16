@@ -216,3 +216,5 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+lc-academy-env/
