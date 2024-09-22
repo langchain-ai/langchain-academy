@@ -1,0 +1,79 @@
+[tool.poetry]
+name = "langchain-academy"
+version = "0.1.0"
+authors = ["langchain academy contributors"]
+description = "RAG"
+readme = "README.md"
+packages = [{ include = "langchain_academy" }]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+
+langgraph = ">=0.2,<0.3"
+langgraph-sdk = ">=0.1"
+langgraph-checkpoint-sqlite = ">=1.0"
+langsmith = ">=0.1"
+tavily-python = ">=0.5"
+langchain-core = ">=0.3,<0.4"
+wikipedia = ">=1.4"
+langchain-openai = ">=0.2,<0.3"
+
+
+[tool.poetry.dev-dependencies]
+ruff = ">=0.5"
+pyright = ">=1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+# ruff setting document: https://docs.astral.sh/ruff/
+line-length = 120
+target-version = "py312"
+
+exclude = [
+    # default setting: https://docs.astral.sh/ruff/configuration/
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    # settings for devcontainermy
+    ".devcontainer",
+    "__pycache__",
+]
+
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E402", "E501"]
+
+
+[tool.ruff.format]
+# https://docs.astral.sh/ruff/settings/#format_docstring-code-line-length
+quote-style = "double"
