@@ -17,11 +17,12 @@ tavily-python = ">=0.5"
 langchain-core = ">=0.3,<0.4"
 wikipedia = ">=1.4"
 langchain-openai = ">=0.2,<0.3"
-
+ipykernel = "^6.29"
 
 [tool.poetry.dev-dependencies]
 ruff = ">=0.5"
 pyright = ">=1.1"
+
 
 [build-system]
 requires = ["poetry-core"]
