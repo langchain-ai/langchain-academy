@@ -1,6 +1,16 @@
 {
-    "python.pythonPath": "${workspaceFolder}/lc-academy-env/bin/python",
-    "python.analysis.extraPaths": [
-        "${workspaceFolder}/lc-academy-env/lib/python3.12/site-packages"
-    ]
+    "python.pythonPath": "/app/.venv/bin/python", // for pylance
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit",
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit",
+        },
+        "editor.defaultFormatter": "charliermarsh.ruff",
+    },
+    "python.analysis.typeCheckingMode": "off",
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.callArgumentNames": "all",
 }
