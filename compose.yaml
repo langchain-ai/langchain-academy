@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: langchain-academy
+    env_file:
+      - .env
+    # ports:
+    #   - "8888:8888"
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+      # in order to use git in docker shell when using devcontainer
+      - ~/.gitconfig:/root/.gitconfig:ro
+    tty: true
+    stdin_open: true
