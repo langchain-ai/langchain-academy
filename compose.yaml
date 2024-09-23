@@ -7,7 +7,9 @@ services:
     env_file:
       - .env
     # ports:
-    #   - "8888:8888"
+    #  - "56091:56091" # langgraph_sdk 用に開けたが、langgraph_sdkは動かなかった。
+    #  - "8123:8123" # langgraph_sdk 用に開けたが、langgraph_sdkは動かなかった。
+    #  - "8888:8888" # for jupyter
     volumes:
       - type: bind
         source: .
