@@ -1,10 +1,10 @@
 import operator
 from pydantic import BaseModel, Field
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 from typing_extensions import TypedDict
 
 from langchain_community.document_loaders import WikipediaLoader
-from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_community.tools import TavilySearchResults
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, get_buffer_string
 from langchain_openai import ChatOpenAI
 
@@ -55,10 +55,15 @@ class InterviewState(MessagesState):
 class SearchQuery(BaseModel):
     search_query: str = Field(None, description="Search query for retrieval.")
 
+class ResearchGraphStateInput(TypedDict):
+    topic: str # Research topic
+    max_analysts: int # Number of analysts
+    human_analyst_feedback: Optional[str] # Human feedback
+
 class ResearchGraphState(TypedDict):
     topic: str # Research topic
     max_analysts: int # Number of analysts
-    human_analyst_feedback: str # Human feedback
+    human_analyst_feedback: Optional[str] # Human feedback
     analysts: List[Analyst] # Analyst asking questions
     sections: Annotated[list, operator.add] # Send() API key
     introduction: str # Introduction for the final report
@@ -141,7 +146,7 @@ def generate_question(state: InterviewState):
     question = llm.invoke([SystemMessage(content=system_message)]+messages)
         
     # Write messages to state
-    return {"messages": [question]}
+    return {"messages": [HumanMessage(content=question.content)]}
 
 # Search query writing
 search_instructions = SystemMessage(content=f"""You will be given a conversation between an analyst and an expert. 
@@ -523,7 +528,7 @@ def finalize_report(state: ResearchGraphState):
     return {"final_report": final_report}
 
 # Add nodes and edges 
-builder = StateGraph(ResearchGraphState)
+builder = StateGraph(ResearchGraphState, input=ResearchGraphStateInput)
 builder.add_node("create_analysts", create_analysts)
 builder.add_node("human_feedback", human_feedback)
 builder.add_node("conduct_interview", interview_builder.compile())
