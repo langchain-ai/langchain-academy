@@ -64,7 +64,7 @@ PS> $env:API_ENV_VAR = "your-api-key-here"
 *  Set `OPENAI_API_KEY` in your environment 
 
 ### Sign up and Set LangSmith API
-* Sign up for LangSmith [here](https://docs.smith.langchain.com/), find out more about LangSmith
+* Sign up for LangSmith [here](https://smith.langchain.com/), find out more about LangSmith
 * and how to use it within your workflow [here](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/)!
 *  Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in your environment 
 
