@@ -27,7 +27,9 @@
                 "charliermarsh.ruff",
                 "ms-toolsai.jupyter",
                 "tamasfe.even-better-toml",
-                "ms-azuretools.vscode-docker"
+                "ms-azuretools.vscode-docker",
+                // "GitHub.copilot", // if you want to use Copilot, uncomment this line
+                // "GitHub.copilot-chat" // if you want to use Copilot, uncomment this line
             ]
         }
     }
