@@ -10,7 +10,17 @@
         },
         "editor.defaultFormatter": "charliermarsh.ruff",
     },
+    // for .ipynb setting. [jupyter] section is not working
+    "notebook.formatOnSave.enabled": true,
+    "notebook.codeActionsOnSave": {
+        "notebook.source.fixAll": "explicit",
+        "notebook.source.organizeImports": "explicit",
+        "notebook.source.fixAll.ruff": "explicit",
+        "notebook.source.organizeImports.ruff": "explicit",
+    },
     "python.analysis.typeCheckingMode": "off",
     "python.analysis.inlayHints.functionReturnTypes": true,
     "python.analysis.inlayHints.callArgumentNames": "all",
+    "editor.formatOnSave": false,
+    "ruff.configuration": "/app/pyproject.toml",
 }
