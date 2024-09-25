@@ -20,7 +20,7 @@ langchain-openai = ">=0.2,<0.3"
 ipykernel = "^6.29"
 
 [tool.poetry.dev-dependencies]
-ruff = ">=0.5"
+ruff = ">=0.6"
 pyright = ">=1.1"
 
 
