@@ -2,7 +2,7 @@
 name = "langchain-academy"
 version = "0.1.0"
 authors = ["langchain academy contributors"]
-description = "RAG"
+description = "explain how to use LangGraph"
 readme = "README.md"
 packages = [{ include = "langchain_academy" }]
 
