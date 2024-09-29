@@ -1,0 +1,3 @@
+# temporary files for the SQLite database
+example.db-shm
+example.db-wal
