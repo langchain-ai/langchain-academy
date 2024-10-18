@@ -1,0 +1,11 @@
+{
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "notebook.output.wordWrap": true,
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#04756f",
+        "titleBar.activeForeground": "#ffffff",
+        "titleBar.inactiveBackground": "#04756f",
+        "titleBar.inactiveForeground": "#000000"
+    }
+}
