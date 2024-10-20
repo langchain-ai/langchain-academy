@@ -59,9 +59,9 @@ $ export API_ENV_VAR="your-api-key-here"
 PS> $env:API_ENV_VAR = "your-api-key-here"
 ```
 
-### Set OpenAI API key
-* If you don't have an OpenAI API key, you can sign up [here](https://openai.com/index/openai-api/).
-*  Set `OPENAI_API_KEY` in your environment 
+### Set GROQ API key
+* If you don't have an GROQ API key, you can sign up [here](https://console.groq.com/keys).
+*  Set `GROQ_API_KEY` in your environment 
 
 ### Sign up and Set LangSmith API
 * Sign up for LangSmith [here](https://smith.langchain.com/), find out more about LangSmith
@@ -91,7 +91,7 @@ Graphs for LangGraph Studio are in the `module-x/studio/` folders.
 ```
 $ for i in {1..4}; do
   cp module-$i/studio/.env.example module-$i/studio/.env
-  echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-$i/studio/.env
+  echo "GROQ_API_KEY=\"$GROQ_API_KEY\"" > module-$i/studio/.env
 done
 $ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
 ```

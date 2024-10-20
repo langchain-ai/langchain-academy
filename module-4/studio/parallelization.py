@@ -8,11 +8,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 
 from langgraph.graph import StateGraph, START, END
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0) 
+llm = ChatGroq(model="llama3-8b-8192", temperature=0) 
 
 class State(TypedDict):
     question: str
