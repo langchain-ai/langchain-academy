@@ -61,8 +61,6 @@ exclude = [
     "node_modules",
     "site-packages",
     "venv",
-    # settings for devcontainer
-    ".devcontainer",
     "__pycache__",
 ]
 
