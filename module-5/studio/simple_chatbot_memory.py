@@ -21,19 +21,24 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     # Retrieve the most recent memories for context
     memories = store.search(namespace)
 
-    # Format the memories for the system prompt
-    info = "\n".join([d.value["data"] for d in memories])
-    system_msg = f"You are a helpful assistant talking to the user. User info: {info}"
-
     # Get the last message from the user 
     last_message = state["messages"][-1]
 
     # Check if it contains the keyword "remember"
     if "remember" in last_message.content.lower():
         
-        # If so, save the message to the store
-        store.put(namespace, str(uuid.uuid4()), {"data": last_message.content})
+        # Distill chat message as a memory 
+        system_msg = f"Create a short memory snippet from the user's message."
+        user_msg = f"User message: {last_message.content}"
+        memory = model.invoke([SystemMessage(content=system_msg)]+[HumanMessage(content=user_msg)])
 
+        # Save the memory to the store
+        store.put(namespace, str(uuid.uuid4()), {"data": memory.content})
+
+    # Format all memories for the system prompt
+    user_memories = "\n".join([d.value["data"] for d in memories])
+    system_msg = f"You are a helpful assistant. Here is relevant information about the user: {user_memories}"
+    
     # Invoke the model with the system prompt that contains the memories as well as the user's messages
     response = model.invoke([SystemMessage(content=system_msg)]+state["messages"])
     return {"messages": response}
