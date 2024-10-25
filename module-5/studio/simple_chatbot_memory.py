@@ -28,7 +28,7 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     if "remember" in last_message.content.lower():
         
         # Distill chat message as a memory 
-        system_msg = f"Create a short memory snippet from the user's message."
+        system_msg = f"Create a simple user profile based on the user's message history to save for long-term memory."
         user_msg = f"User message: {last_message.content}"
         memory = model.invoke([SystemMessage(content=system_msg)]+[HumanMessage(content=user_msg)])
 
