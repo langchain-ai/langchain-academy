@@ -19,7 +19,7 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     namespace = ("memories", user_id)
 
     # Retrieve the most recent memories for context
-    memories = store.search(namespace)
+    existing_profile = store.get(namespace, "user_profile")
 
     # Get the last message from the user 
     last_message = state["messages"][-1]
@@ -29,15 +29,15 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
         
         # Distill chat message as a memory 
         system_msg = f"Create a simple user profile based on the user's message history to save for long-term memory."
-        user_msg = f"User message: {last_message.content}"
-        memory = model.invoke([SystemMessage(content=system_msg)]+[HumanMessage(content=user_msg)])
+        user_msg = f"User messages: {state['messages']}"
+        new_profile = model.invoke([SystemMessage(content=system_msg)]+[HumanMessage(content=user_msg)])
 
         # Save the memory to the store
-        store.put(namespace, str(uuid.uuid4()), {"data": memory.content})
+        key = "user_profile"
+        store.put(namespace, key, {"profile": new_profile.content})
 
     # Format all memories for the system prompt
-    user_memories = "\n".join([d.value["data"] for d in memories])
-    system_msg = f"You are a helpful assistant. Here is relevant information about the user: {user_memories}"
+    system_msg = f"You are a helpful assistant. Here is the profile for the user: {existing_profile.value if existing_profile else None}"
     
     # Invoke the model with the system prompt that contains the memories as well as the user's messages
     response = model.invoke([SystemMessage(content=system_msg)]+state["messages"])
