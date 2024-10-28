@@ -11,36 +11,38 @@ from configuration import ChatbotConfigurable
 model = ChatOpenAI(model="gpt-4o", temperature=0) 
 
 def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
+
+    """If the user says the keyword "remember", save a memory to the store.
+    Load any existing memory from the store and use it to personalize the chatbot's response."""
     
     # Get the user ID from the config
     user_id = config["configurable"]["user_id"]
 
-    # Define the namespace for the memories
-    namespace = ("memories", user_id)
+    # Retrieve any existing memory from the store
+    namespace = ("memory", user_id)
+    existing_memory = store.get(namespace, "user_memory")
 
-    # Retrieve the most recent memories for context
-    existing_profile = store.get(namespace, "user_profile")
+    # Format the existing memory for the system prompt
+    system_msg = f"""You are a helpful assistant. Here is the memory for the user. 
+    Use this to personalize responses: {existing_memory.value if existing_memory else None}"""
 
-    # Get the last message from the user 
+    # Respond using existing memory as well as the chat history
+    response = model.invoke([SystemMessage(content=system_msg)]+state["messages"])
+
+    # Now, consider if we want to update memory  
+    # Check if the last message contains the keyword "remember"
     last_message = state["messages"][-1]
-
-    # Check if it contains the keyword "remember"
     if "remember" in last_message.content.lower():
         
-        # Distill chat message as a memory 
+        # If the user instructs us to "remember", distill the chat history into a memory  
         system_msg = f"Create a simple user profile based on the user's message history to save for long-term memory."
         user_msg = f"User messages: {state['messages']}"
-        new_profile = model.invoke([SystemMessage(content=system_msg)]+[HumanMessage(content=user_msg)])
+        new_memory = model.invoke([SystemMessage(content=system_msg)]+[HumanMessage(content=user_msg)])
 
-        # Save the memory to the store
-        key = "user_profile"
-        store.put(namespace, key, {"profile": new_profile.content})
+        # Overwrite the memory to the store as a string 
+        key = "user_memory"
+        store.put(namespace, key, {"user_profile": new_memory.content})
 
-    # Format all memories for the system prompt
-    system_msg = f"You are a helpful assistant. Here is the profile for the user: {existing_profile.value if existing_profile else None}"
-    
-    # Invoke the model with the system prompt that contains the memories as well as the user's messages
-    response = model.invoke([SystemMessage(content=system_msg)]+state["messages"])
     return {"messages": response}
 
 # Define the graph
