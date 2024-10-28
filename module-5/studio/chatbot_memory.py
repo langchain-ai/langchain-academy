@@ -48,15 +48,14 @@ def write_memory(state: MessagesState, config: RunnableConfig, store: BaseStore)
     existing_memory = store.get(namespace, "user_memory")
         
     # Create new memory from the chat history and existing memory
-    system_msg = f"""Create or update a user profile memory based on the user's chat history. 
-    This will be saved for long-term memory. If there is an existing memory, simply update it. 
+    system_msg = f"""Create or update a memory that captures information about the user based on the following chat history. 
+    This will be saved for long-term memory. If there is an existing memory, simply update it with the new information.
     Here is the existing memory (it may be empty): {existing_memory.value if existing_memory else None}"""
-    user_msg = f"Chat history: {state['messages']}"
-    new_memory = model.invoke([SystemMessage(content=system_msg)]+[HumanMessage(content=user_msg)])
+    new_memory = model.invoke([SystemMessage(content=system_msg)]+state['messages'])
 
-    # Overwrite the existing use profile memory in the store as a string 
+    # Overwrite the existing memory in the store 
     key = "user_memory"
-    store.put(namespace, key, {"user_profile": new_memory.content})
+    store.put(namespace, key, {"memory": new_memory.content})
 
 # Define the graph
 # TODO(review with Will): Default user ID is not getting passed through. 
