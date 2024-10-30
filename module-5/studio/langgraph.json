@@ -1,7 +1,8 @@
 {
     "dockerfile_lines": [],
     "graphs": {
-      "chatbot_memory": "./chatbot_memory.py:graph"
+      "chatbot_memory": "./chatbot_memory.py:graph",
+      "memory_agent": "./memory_agent.py:graph"
     },
     "env": "./.env",
     "python_version": "3.11",
