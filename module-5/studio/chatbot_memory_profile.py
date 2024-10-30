@@ -1,3 +1,7 @@
+from pydantic import BaseModel, Field
+
+from trustcall import create_extractor
+
 from langchain_core.messages import SystemMessage
 from langchain_core.runnables.config import RunnableConfig
 from langchain_openai import ChatOpenAI
@@ -8,15 +12,27 @@ import configuration
 # Initialize the LLM
 model = ChatOpenAI(model="gpt-4o", temperature=0) 
 
+# Schema 
+class UserProfile(BaseModel):
+    """ Profile of a user """
+    user_name: str = Field(description="The user's preferred name")
+    user_location: str = Field(description="The user's location")
+    interests: list = Field(description="A list of the user's interests")
+
+# Create the extractor
+trustcall_extractor = create_extractor(
+    model,
+    tools=[UserProfile],
+    tool_choice="UserProfile", # Enforces use of the UserProfile tool
+)
+
 # Chatbot instruction
 MODEL_SYSTEM_MESSAGE = """You are a helpful assistant with memory that provides information about the user. 
 If you have memory for this user, use it to personalize your responses.
 Here is the memory (it may be empty): {memory}"""
 
-# Memory writing instruction
-CREATE_MEMORY_INSTRUCTION = """Create or update a user profile memory based on the user's chat history. 
-This will be saved for long-term memory. If there is an existing memory, simply update it. 
-Here is the existing memory (it may be empty): {memory}"""
+# Extraction instruction
+TRUSTCALL_INSTRUCTION = """Create or update the memory (JSON doc) to incorporate information from the following conversation:"""
 
 def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
 
@@ -54,13 +70,18 @@ def write_memory(state: MessagesState, config: RunnableConfig, store: BaseStore)
     namespace = ("memory", user_id)
     existing_memory = store.get(namespace, "user_memory")
         
-    # Format the memory in the system prompt
-    system_msg = CREATE_MEMORY_INSTRUCTION.format(memory=existing_memory.value if existing_memory else None)
-    new_memory = model.invoke([SystemMessage(content=system_msg)]+state['messages'])
+    # Get the profile as the value from the list, and convert it to a JSON doc
+    existing_profile = {"UserProfile": existing_memory.value} if existing_memory else None
+    
+    # Invoke the extractor
+    result = trustcall_extractor.invoke({"messages": [SystemMessage(content=TRUSTCALL_INSTRUCTION)]+state["messages"], "existing": existing_profile})
+    
+    # Get the updated profile as a JSON object
+    updated_profile = result["responses"][0].model_dump()
 
-    # Overwrite the existing memory in the store 
+    # Save the updated profile
     key = "user_memory"
-    store.put(namespace, key, {"memory": new_memory.content})
+    store.put(namespace, key, updated_profile)
 
 # Define the graph
 builder = StateGraph(MessagesState,config_schema=configuration.Configuration)
