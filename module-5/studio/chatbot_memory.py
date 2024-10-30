@@ -9,6 +9,16 @@ import configuration
 # Initialize the LLM
 model = ChatOpenAI(model="gpt-4o", temperature=0) 
 
+# Chatbot instruction
+chatbot_instruction = """You are a helpful assistant with memory that provides information about the user. 
+If you have memory for this user, use it to personalize your responses.
+Here is the memory (it may be empty): {memory}"""
+
+# Memory writing instruction
+write_memory_instruction = """Create or update a user profile memory based on the user's chat history. 
+This will be saved for long-term memory. If there is an existing memory, simply update it. 
+Here is the existing memory (it may be empty): {memory}"""
+
 def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
 
     """Load memory from the store and use it to personalize the chatbot's response."""
@@ -24,9 +34,7 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     existing_memory = store.get(namespace, "user_memory")
 
     # Format the memory in the system prompt
-    system_msg = f"""You are a helpful assistant with memory that provides information about the user. 
-    If you have memory for this user, use it to personalize your responses.
-    Here is the memory (it may be empty): {existing_memory.value if existing_memory else None}"""
+    system_msg = chatbot_instruction.format(memory=existing_memory.value if existing_memory else None)
 
     # Respond using memory as well as the chat history
     response = model.invoke([SystemMessage(content=system_msg)]+state["messages"])
@@ -47,10 +55,8 @@ def write_memory(state: MessagesState, config: RunnableConfig, store: BaseStore)
     namespace = ("memory", user_id)
     existing_memory = store.get(namespace, "user_memory")
         
-    # Create new memory from the chat history and existing memory
-    system_msg = f"""Create or update a memory that captures information about the user based on the following chat history. 
-    This will be saved for long-term memory. If there is an existing memory, simply update it with the new information.
-    Here is the existing memory (it may be empty): {existing_memory.value if existing_memory else None}"""
+    # Format the memory in the system prompt
+    system_msg = write_memory_instruction.format(memory=existing_memory.value if existing_memory else None)
     new_memory = model.invoke([SystemMessage(content=system_msg)]+state['messages'])
 
     # Overwrite the existing memory in the store 
