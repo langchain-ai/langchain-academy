@@ -26,23 +26,30 @@ model = ChatOpenAI(model="gpt-4o", temperature=0)
 # User profile schema
 class Profile(BaseModel):
     """This is the profile of the user you are chatting with"""
-    name: str = Field(description="The user's name")
-    location: str = Field(description="The user's location")
-    job: str = Field(description="The user's job")
-    connections: list[str] = Field(description="Personal connection of the user, such as family members, friends, or coworkers")
-    interests: list[str] = Field(description="Interests that the user has")
+    name: Optional[str] = Field(description="The user's name", default=None)
+    location: Optional[str] = Field(description="The user's location", default=None)
+    job: Optional[str] = Field(description="The user's job", default=None)
+    connections: list[str] = Field(
+        description="Personal connection of the user, such as family members, friends, or coworkers",
+        default_factory=list
+    )
+    interests: list[str] = Field(
+        description="Interests that the user has", 
+        default_factory=list
+    )
 
 # ToDo schema
 class ToDo(BaseModel):
     task: str = Field(description="The task to be completed.")
-    time_to_complete: int = Field(description="Estimated time to complete the task (minutes).")
+    time_to_complete: Optional[int] = Field(description="Estimated time to complete the task (minutes).")
     deadline: Optional[datetime] = Field(
         description="When the task needs to be completed by (if applicable)",
         default=None
     )
     solutions: list[str] = Field(
-        description="List of specific, actionable solutions (e.g., specific locations, service providers, or concrete options relevant to completing the task)",
-        min_items=1
+        description="List of specific, actionable solutions (e.g., specific ideas, service providers, or concrete options relevant to completing the task)",
+        min_items=1,
+        default_factory=list
     )
 
 # Update memory tool
@@ -111,7 +118,9 @@ TRUSTCALL_INSTRUCTION = """Reflect on following interaction.
 
 Use the provided tools to retain any necessary memories about the user. 
 
-Use parallel tool calling to handle updates and insertions simultaneously:"""
+Use parallel tool calling to handle updates and insertions simultaneously.
+
+System Time: {time}"""
 
 # Instructions for updating the ToDo list
 CREATE_INSTRUCTIONS = """Reflect on the following interaction.
@@ -184,7 +193,8 @@ def update_profile(state: MessagesState, config: RunnableConfig, store: BaseStor
                         )
 
     # Merge the chat history and the instruction
-    updated_messages=list(merge_message_runs(messages=[SystemMessage(content=TRUSTCALL_INSTRUCTION)] + state["messages"][:-1]))
+    TRUSTCALL_INSTRUCTION_FORMATTED=TRUSTCALL_INSTRUCTION.format(time=datetime.now().isoformat())
+    updated_messages=list(merge_message_runs(messages=[SystemMessage(content=TRUSTCALL_INSTRUCTION_FORMATTED)] + state["messages"][:-1]))
 
     # Invoke the extractor
     result = profile_extractor.invoke({"messages": updated_messages, 
@@ -223,7 +233,8 @@ def update_todos(state: MessagesState, config: RunnableConfig, store: BaseStore)
                         )
 
     # Merge the chat history and the instruction
-    updated_messages=list(merge_message_runs(messages=[SystemMessage(content=TRUSTCALL_INSTRUCTION)] + state["messages"][:-1]))
+    TRUSTCALL_INSTRUCTION_FORMATTED=TRUSTCALL_INSTRUCTION.format(time=datetime.now().isoformat())
+    updated_messages=list(merge_message_runs(messages=[SystemMessage(content=TRUSTCALL_INSTRUCTION_FORMATTED)] + state["messages"][:-1]))
 
     # Invoke the extractor
     result = todo_extractor.invoke({"messages": updated_messages, 
