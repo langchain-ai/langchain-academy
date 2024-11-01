@@ -20,8 +20,69 @@ from langgraph.store.memory import InMemoryStore
 
 import configuration
 
-# Initialize the model
-model = ChatOpenAI(model="gpt-4o", temperature=0)
+## Utilities 
+
+# Inspect the tool calls for Trustcall
+class Spy:
+    def __init__(self):
+        self.called_tools = []
+
+    def __call__(self, run):
+        q = [run]
+        while q:
+            r = q.pop()
+            if r.child_runs:
+                q.extend(r.child_runs)
+            if r.run_type == "chat_model":
+                self.called_tools.append(
+                    r.outputs["generations"][0][0]["message"]["kwargs"]["tool_calls"]
+                )
+
+# Extract information from tool calls for both patches and new memories in Trustcall
+def extract_tool_info(tool_calls, schema_name="Memory"):
+    """Extract information from tool calls for both patches and new memories.
+    
+    Args:
+        tool_calls: List of tool calls from the model
+        schema_name: Name of the schema tool (e.g., "Memory", "ToDo", "Profile")
+    """
+
+    # Initialize list of changes
+    changes = []
+    
+    for call_group in tool_calls:
+        for call in call_group:
+            if call['name'] == 'PatchDoc':
+                changes.append({
+                    'type': 'update',
+                    'doc_id': call['args']['json_doc_id'],
+                    'planned_edits': call['args']['planned_edits'],
+                    'value': call['args']['patches'][0]['value']
+                })
+            elif call['name'] == schema_name:
+                changes.append({
+                    'type': 'new',
+                    'value': call['args']
+                })
+
+    # Format results as a single string
+    result_parts = []
+    for change in changes:
+        if change['type'] == 'update':
+            result_parts.append(
+                f"Document {change['doc_id']} updated:\n"
+                f"Plan: {change['planned_edits']}\n"
+                f"Added content: {change['value']}"
+            )
+        else:
+            result_parts.append(
+                f"New {schema_name} created:\n"
+                f"Content: {change['value']}"
+            )
+    
+    return "\n\n".join(result_parts)
+
+## Schema definitions
 
 # User profile schema
 class Profile(BaseModel):
@@ -52,23 +113,24 @@ class ToDo(BaseModel):
         default_factory=list
     )
 
+## Initialize the model and tools
+
 # Update memory tool
 class UpdateMemory(TypedDict):
     """ Decision on what memory type to update """
     update_type: Literal['user', 'todo', 'instructions']
 
-# Create the Trustcall extractors for updating the user profile and ToDo list
+# Initialize the model
+model = ChatOpenAI(model="gpt-4o", temperature=0)
+
+## Create the Trustcall extractors for updating the user profile and ToDo list
 profile_extractor = create_extractor(
     model,
     tools=[Profile],
     tool_choice="Profile",
 )
-todo_extractor = create_extractor(
-    model,
-    tools=[ToDo],
-    tool_choice="ToDo",
-    enable_inserts=True
-)
+
+## Prompts 
 
 # Chatbot instruction for choosing what to update and what tools to call 
 MODEL_SYSTEM_MESSAGE = """You are a helpful chatbot. 
@@ -133,7 +195,8 @@ Your current instructions are:
 {current_instructions}
 </current_instructions>"""
 
-# Node definitions
+## Node definitions
+
 def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
 
     """Load memories from the store and use them to personalize the chatbot's response."""
@@ -236,6 +299,17 @@ def update_todos(state: MessagesState, config: RunnableConfig, store: BaseStore)
     TRUSTCALL_INSTRUCTION_FORMATTED=TRUSTCALL_INSTRUCTION.format(time=datetime.now().isoformat())
     updated_messages=list(merge_message_runs(messages=[SystemMessage(content=TRUSTCALL_INSTRUCTION_FORMATTED)] + state["messages"][:-1]))
 
+    # Initialize the spy for visibility into the tool calls made by Trustcall
+    spy = Spy()
+    
+    # Create the Trustcall extractor for updating the ToDo list 
+    todo_extractor = create_extractor(
+    model,
+    tools=[ToDo],
+    tool_choice=tool_name,
+    enable_inserts=True
+    ).with_listeners(on_end=spy)
+
     # Invoke the extractor
     result = todo_extractor.invoke({"messages": updated_messages, 
                                          "existing": existing_memories})
@@ -246,9 +320,13 @@ def update_todos(state: MessagesState, config: RunnableConfig, store: BaseStore)
                   rmeta.get("json_doc_id", str(uuid.uuid4())),
                   r.model_dump(mode="json"),
             )
+        
+    # Respond to the tool call made in call_model, confirming the update    
     tool_calls = state['messages'][-1].tool_calls
-    # Return tool message with update verification
-    return {"messages": [{"role": "tool", "content": "updated todo list", "tool_call_id":tool_calls[0]['id']}]}
+
+    # Extract the changes made by Trustcall and add the the ToolMessage returned to call_model
+    todo_update_msg = extract_tool_info(spy.called_tools, tool_name)
+    return {"messages": [{"role": "tool", "content": todo_update_msg, "tool_call_id":tool_calls[0]['id']}]}
 
 def update_instructions(state: MessagesState, config: RunnableConfig, store: BaseStore):
 
