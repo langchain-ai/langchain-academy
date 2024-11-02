@@ -112,6 +112,10 @@ class ToDo(BaseModel):
         min_items=1,
         default_factory=list
     )
+    status: Literal["not started", "in progress", "done", "archived"] = Field(
+        description="Current status of the task",
+        default="not started"
+    )
 
 ## Initialize the model and tools
 
@@ -197,7 +201,7 @@ Your current instructions are:
 
 ## Node definitions
 
-def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
+def task_mAIstro(state: MessagesState, config: RunnableConfig, store: BaseStore):
 
     """Load memories from the store and use them to personalize the chatbot's response."""
     
@@ -321,10 +325,10 @@ def update_todos(state: MessagesState, config: RunnableConfig, store: BaseStore)
                   r.model_dump(mode="json"),
             )
         
-    # Respond to the tool call made in call_model, confirming the update    
+    # Respond to the tool call made in task_mAIstro, confirming the update    
     tool_calls = state['messages'][-1].tool_calls
 
-    # Extract the changes made by Trustcall and add the the ToolMessage returned to call_model
+    # Extract the changes made by Trustcall and add the the ToolMessage returned to task_mAIstro
     todo_update_msg = extract_tool_info(spy.called_tools, tool_name)
     return {"messages": [{"role": "tool", "content": todo_update_msg, "tool_call_id":tool_calls[0]['id']}]}
 
@@ -373,17 +377,17 @@ def route_message(state: MessagesState, config: RunnableConfig, store: BaseStore
 builder = StateGraph(MessagesState, config_schema=configuration.Configuration)
 
 # Define the flow of the memory extraction process
-builder.add_node(call_model)
+builder.add_node(task_mAIstro)
 builder.add_node(update_todos)
 builder.add_node(update_profile)
 builder.add_node(update_instructions)
 
 # Define the flow 
-builder.add_edge(START, "call_model")
-builder.add_conditional_edges("call_model", route_message)
-builder.add_edge("update_todos", "call_model")
-builder.add_edge("update_profile", "call_model")
-builder.add_edge("update_instructions", "call_model")
+builder.add_edge(START, "task_mAIstro")
+builder.add_conditional_edges("task_mAIstro", route_message)
+builder.add_edge("update_todos", "task_mAIstro")
+builder.add_edge("update_profile", "task_mAIstro")
+builder.add_edge("update_instructions", "task_mAIstro")
 
 # Compile the graph
 graph = builder.compile()
