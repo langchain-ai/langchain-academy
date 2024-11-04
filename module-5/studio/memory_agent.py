@@ -342,14 +342,14 @@ def update_instructions(state: MessagesState, config: RunnableConfig, store: Bas
     
     namespace = ("instructions", user_id)
 
-    existing_memory = store.get(namespace, "user_memory")
+    existing_memory = store.get(namespace, "user_instructions")
         
     # Format the memory in the system prompt
     system_msg = CREATE_INSTRUCTIONS.format(current_instructions=existing_memory.value if existing_memory else None)
     new_memory = model.invoke([SystemMessage(content=system_msg)]+state['messages'][:-1] + [HumanMessage(content="Please update the instructions based on the conversation")])
 
     # Overwrite the existing memory in the store 
-    key = "user_memory"
+    key = "user_instructions"
     store.put(namespace, key, {"memory": new_memory.content})
     tool_calls = state['messages'][-1].tool_calls
     # Return tool message with update verification
