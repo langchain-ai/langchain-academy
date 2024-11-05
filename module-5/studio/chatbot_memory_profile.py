@@ -48,8 +48,19 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     namespace = ("memory", user_id)
     existing_memory = store.get(namespace, "user_memory")
 
+    # Format the memories for the system prompt
+    if existing_memory and existing_memory.value:
+        memory_dict = existing_memory.value
+        formatted_memory = (
+            f"Name: {memory_dict.get('user_name', 'Unknown')}\n"
+            f"Location: {memory_dict.get('user_location', 'Unknown')}\n"
+            f"Interests: {', '.join(memory_dict.get('interests', []))}"      
+        )
+    else:
+        formatted_memory = None
+
     # Format the memory in the system prompt
-    system_msg = MODEL_SYSTEM_MESSAGE.format(memory=existing_memory.value if existing_memory else None)
+    system_msg = MODEL_SYSTEM_MESSAGE.format(memory=formatted_memory)
 
     # Respond using memory as well as the chat history
     response = model.invoke([SystemMessage(content=system_msg)]+state["messages"])
