@@ -45,8 +45,8 @@ It's easy to sign up and offers a very generous free tier. Some lessons (in Modu
 
 ### Set up Development enviroment
 
-If you open the repository in VSCode, devcontainer will launch a docker environment.
-Alternatively, you can use `$ docker compose up -d` to build a docker environment.
+* If you open the repository in VSCode, devcontainer will launch a docker environment.
+* Alternatively, you can use `$ docker compose up -d` to build a docker environment.
 
 ### Set up LangGraph Studio
 
