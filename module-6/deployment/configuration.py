@@ -10,6 +10,7 @@ from dataclasses import dataclass
 class Configuration:
     """The configurable fields for the chatbot."""
     user_id: str = "default-user"
+    todo_category: str = "general" 
 
     @classmethod
     def from_runnable_config(

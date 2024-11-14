@@ -221,9 +221,10 @@ def task_mAIstro(state: MessagesState, config: RunnableConfig, store: BaseStore)
     # Get the user ID from the config
     configurable = configuration.Configuration.from_runnable_config(config)
     user_id = configurable.user_id
+    todo_category = configurable.todo_category
 
    # Retrieve profile memory from the store
-    namespace = ("profile", user_id)
+    namespace = ("profile", todo_category, user_id)
     memories = store.search(namespace)
     if memories:
         user_profile = memories[0].value
@@ -231,12 +232,12 @@ def task_mAIstro(state: MessagesState, config: RunnableConfig, store: BaseStore)
         user_profile = None
 
     # Retrieve people memory from the store
-    namespace = ("todo", user_id)
+    namespace = ("todo", todo_category, user_id)
     memories = store.search(namespace)
     todo = "\n".join(f"{mem.value}" for mem in memories)
 
     # Retrieve custom instructions
-    namespace = ("instructions", user_id)
+    namespace = ("instructions", todo_category, user_id)
     memories = store.search(namespace)
     if memories:
         instructions = memories[0].value
@@ -257,9 +258,10 @@ def update_profile(state: MessagesState, config: RunnableConfig, store: BaseStor
     # Get the user ID from the config
     configurable = configuration.Configuration.from_runnable_config(config)
     user_id = configurable.user_id
+    todo_category = configurable.todo_category
 
     # Define the namespace for the memories
-    namespace = ("profile", user_id)
+    namespace = ("profile", todo_category, user_id)
 
     # Retrieve the most recent memories for context
     existing_items = store.search(namespace)
@@ -297,9 +299,10 @@ def update_todos(state: MessagesState, config: RunnableConfig, store: BaseStore)
     # Get the user ID from the config
     configurable = configuration.Configuration.from_runnable_config(config)
     user_id = configurable.user_id
+    todo_category = configurable.todo_category
 
     # Define the namespace for the memories
-    namespace = ("todo", user_id)
+    namespace = ("todo", todo_category, user_id)
 
     # Retrieve the most recent memories for context
     existing_items = store.search(namespace)
@@ -352,8 +355,9 @@ def update_instructions(state: MessagesState, config: RunnableConfig, store: Bas
     # Get the user ID from the config
     configurable = configuration.Configuration.from_runnable_config(config)
     user_id = configurable.user_id
+    todo_category = configurable.todo_category
     
-    namespace = ("instructions", user_id)
+    namespace = ("instructions", todo_category, user_id)
 
     existing_memory = store.get(namespace, "user_instructions")
         
