@@ -25,13 +25,8 @@
 
 この[汎用的なアーキテクチャ](https://blog.langchain.dev/planning-for-agents/)は、多くのタイプのツールに適用できます。
 
-## LangSmith
-
-ここで、LangSmithを[トレース](https://docs.smith.langchain.com/concepts/tracing)のために使用します。
-
-プロジェクト`langchain-academy`にログを記録します。
-
 システムメッセージとノードをLLMとプロンプトで設定し、全体的な望ましいエージェントの振る舞いを指定します。
+
 
 以前と同様に、`MessagesState`を使用し、ツールのリストを持つ`Tools`ノードを定義します。
 
@@ -51,5 +46,10 @@
 * このループは、モデルがツールを呼び出すことを決定する限り続きます
 * モデルの応答がツール呼び出しでない場合、フローはENDに向かい、プロセスが終了します
 
+## LangSmith
+
+ここで、LangSmithを[トレース](https://docs.smith.langchain.com/concepts/tracing)のために使用します。
+
+プロジェクト`langchain-academy`にログを記録します。
 
 LangSmithでトレースを確認できます。
