@@ -150,9 +150,7 @@ profile_extractor = create_extractor(
 ## Prompts 
 
 # Chatbot instruction for choosing what to update and what tools to call 
-MODEL_SYSTEM_MESSAGE = """You are a helpful chatbot. 
-
-You are designed to be a companion to a user, helping them keep track of their ToDo list.
+MODEL_SYSTEM_MESSAGE = """{task_maistro_role} 
 
 You have a long term memory which keeps track of three things:
 1. The user's profile (general information about them) 
@@ -222,6 +220,7 @@ def task_mAIstro(state: MessagesState, config: RunnableConfig, store: BaseStore)
     configurable = configuration.Configuration.from_runnable_config(config)
     user_id = configurable.user_id
     todo_category = configurable.todo_category
+    task_maistro_role = configurable.task_maistro_role
 
    # Retrieve profile memory from the store
     namespace = ("profile", todo_category, user_id)
@@ -244,7 +243,7 @@ def task_mAIstro(state: MessagesState, config: RunnableConfig, store: BaseStore)
     else:
         instructions = ""
     
-    system_msg = MODEL_SYSTEM_MESSAGE.format(user_profile=user_profile, todo=todo, instructions=instructions)
+    system_msg = MODEL_SYSTEM_MESSAGE.format(task_maistro_role=task_maistro_role, user_profile=user_profile, todo=todo, instructions=instructions)
 
     # Respond using memory as well as the chat history
     response = model.bind_tools([UpdateMemory], parallel_tool_calls=False).invoke([SystemMessage(content=system_msg)]+state["messages"])

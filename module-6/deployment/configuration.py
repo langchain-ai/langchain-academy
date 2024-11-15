@@ -11,6 +11,7 @@ class Configuration:
     """The configurable fields for the chatbot."""
     user_id: str = "default-user"
     todo_category: str = "general" 
+    task_maistro_role: str = "You are a helpful task management assistant. You help you create, organize, and manage the user's ToDo list."
 
     @classmethod
     def from_runnable_config(
