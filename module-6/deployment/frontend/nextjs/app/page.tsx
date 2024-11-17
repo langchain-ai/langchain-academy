@@ -8,7 +8,8 @@ import { ChatBoxSettings, QuestionData } from '../types/data';
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
-import InputArea from "@/components/ResearchBlocks/elements/InputArea";
+import InputArea from "@/components/Blocks/InputArea";
+import AgentLogs from "@/components/Blocks/AgentLogs";
 import HumanFeedback from "@/components/HumanFeedback";
 import LoadingDots from "@/components/LoadingDots";
 
@@ -26,6 +27,7 @@ export default function Home() {
   const [questionForHuman, setQuestionForHuman] = useState<true | false>(false);
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [isStopped, setIsStopped] = useState(false);
+  const [orderedData, setOrderedData] = useState<Data[]>([]);
 
   const handleFeedbackSubmit = (feedback: string | null) => {
     if (socket) {
@@ -42,9 +44,9 @@ export default function Home() {
     
     const storedConfig = localStorage.getItem('apiVariables');
     const apiVariables = storedConfig ? JSON.parse(storedConfig) : {};
-    const langgraphHostUrl = apiVariables.LANGGRAPH_HOST_URL;
+    const langgraphHostUrl = 'http:localhost:8123'
 
-    if (chatBoxSettings.report_type === 'multi_agents' && langgraphHostUrl) {
+    if (langgraphHostUrl) {
       let { streamResponse, host, thread_id } = await startLanggraphResearch(newQuestion, chatBoxSettings.report_source, langgraphHostUrl);
       const langsmithGuiLink = `https://smith.langchain.com/studio/thread/${thread_id}?baseUrl=${host}`;
       setOrderedData((prevOrder) => [...prevOrder, { type: 'langgraphButton', link: langsmithGuiLink }]);
@@ -69,29 +71,6 @@ export default function Home() {
     setShowResult(false);
     setPromptValue("");
     setAnswer("");
-  };
-
-  const handleClickSuggestion = (value: string) => {
-    setPromptValue(value);
-    const element = document.getElementById('input-area');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  /**
-   * Handles stopping the current research
-   * - Closes WebSocket connection
-   * - Stops loading state
-   * - Marks research as stopped
-   * - Preserves current results
-   */
-  const handleStopResearch = () => {
-    if (socket) {
-      socket.close();
-    }
-    setLoading(false);
-    setIsStopped(true);
   };
 
   /**
@@ -125,7 +104,6 @@ export default function Home() {
         loading={loading}
         isStopped={isStopped}
         showResult={showResult}
-        onStop={handleStopResearch}
         onNewResearch={handleStartNewResearch}
       />
       <main className="min-h-[100vh] pt-[120px]">
@@ -141,11 +119,10 @@ export default function Home() {
           <div className="flex h-full w-full grow flex-col justify-between">
             <div className="container w-full space-y-2">
               <div className="container space-y-2 task-components">
-                <ResearchResults
-                  orderedData={orderedData}
+                <AgentLogs
+                  agentLogs={orderedData}
                   answer={answer}
                   allLogs={allLogs}
-                  handleClickSuggestion={handleClickSuggestion}
                 />
               </div>
 
@@ -157,7 +134,7 @@ export default function Home() {
                 />
               )}
 
-              <div className="pt-1 sm:pt-2" ref={chatContainerRef}></div>
+              <div className="pt-1 sm:pt-2"></div>
             </div>
             <div id="input-area" className="container px-4 lg:px-0">
               {loading ? (

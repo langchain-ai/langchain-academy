@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ResearchForm from '../Task/ResearchForm';
 import Report from '../Task/Report';
 import AgentLogs from '../Task/AgentLogs';
-import AccessReport from '../ResearchBlocks/AccessReport';
+import AccessReport from '../Blocks/AccessReport';
 
 interface ChatBoxSettings {
   report_source: string;

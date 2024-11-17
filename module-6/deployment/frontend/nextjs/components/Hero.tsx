@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { FC } from "react";
-import InputArea from "./ResearchBlocks/elements/InputArea";
+import InputArea from "./Blocks/InputArea";
 
 type THeroProps = {
   promptValue: string;
