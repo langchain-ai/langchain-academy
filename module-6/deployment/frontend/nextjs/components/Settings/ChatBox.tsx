@@ -54,12 +54,6 @@ export default function ChatBox({ chatBoxSettings, setChatBoxSettings }: ChatBox
           chatBoxSettings={chatBoxSettings} 
           setChatBoxSettings={setChatBoxSettings}
         />
-
-        {agentLogs?.length > 0 ? <AgentLogs agentLogs={agentLogs} /> : ''}
-        <div className="margin-div">
-          {report ? <Report report={report} /> : ''}
-          {/* {Object.keys(accessData).length != 0 ? <AccessReport accessData={accessData} report={report} /> : ''} */}
-        </div>
       </main>
     </div>
   );
