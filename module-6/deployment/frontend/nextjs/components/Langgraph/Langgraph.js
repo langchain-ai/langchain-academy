@@ -41,14 +41,13 @@ export async function startLanggraphResearch(newQuestion, report_source, langgra
     `    
 
     let configurations = {
-      "graph_id": "task_maistro",
       "todo_category": "work", 
       "user_id": "lance",
       "task_maistro_role": task_maistro_role}
 
     work_assistant = await client.assistants.create(
       {
-        graph_id: "task_maistro",
+        graphId: "task_maistro",
         config: {"configurable": configurations}
       }
     )
