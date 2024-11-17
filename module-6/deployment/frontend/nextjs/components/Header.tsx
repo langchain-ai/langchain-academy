@@ -39,13 +39,13 @@ const Header = ({ loading, isStopped, showResult, onStop, onNewResearch }: Heade
                 Stop
               </button>
             )}
-            {/* New Research button - shown after stopping or completing research */}
+            {/* New Chat button - shown after stopping or completing research */}
             {(isStopped || !loading) && showResult && (
               <button
                 onClick={onNewResearch}
                 className="flex items-center justify-center px-6 h-8 text-sm text-white bg-[rgb(168,85,247)] rounded-full hover:bg-[rgb(147,51,234)] transform hover:scale-105 transition-all duration-200 shadow-lg whitespace-nowrap"
               >
-                New Research
+                New Chat
               </button>
             )}
           </div>

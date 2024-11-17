@@ -90,7 +90,7 @@ export default function Home() {
   };
 
   /**
-   * Handles starting a new research
+   * Handles starting a New Chat
    * - Clears all previous research data and states
    * - Resets UI to initial state
    * - Closes any existing WebSocket connections
