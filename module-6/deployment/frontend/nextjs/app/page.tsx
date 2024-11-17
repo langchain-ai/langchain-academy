@@ -36,6 +36,21 @@ export default function Home() {
     setShowHumanFeedback(false);
   };
 
+  const handleChat = async (message: string) => {
+    if (socket) {
+      setShowResult(true);
+      setQuestion(message);
+      setLoading(true);
+      setPromptValue("");
+      setAnswer("");
+
+      const questionData: QuestionData = { type: 'question', content: message };
+      setOrderedData(prevOrder => [...prevOrder, questionData]);
+      
+      socket.send(`chat${JSON.stringify({ message })}`);
+    }
+  };
+
   const handleDisplayResult = async (newQuestion: string) => {
     setShowResult(true);
     setLoading(true);
@@ -59,6 +74,7 @@ export default function Home() {
         } else if (previousChunk) {
           const differences = findDifferences(previousChunk, chunk);
           setOrderedData((prevOrder) => [...prevOrder, { type: 'differences', content: 'differences', output: JSON.stringify(differences) }]);
+          setLoading(false);
         }
         previousChunk = chunk;
       }
