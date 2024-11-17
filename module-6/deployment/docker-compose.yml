@@ -36,8 +36,8 @@ services:
                 condition: service_healthy
         environment:
             REDIS_URI: redis://langgraph-redis:6379
-            OPENAI_API_KEY: "xxx"
-            LANGSMITH_API_KEY: "xxx"
+            OPENAI_API_KEY: ${OPENAI_API_KEY}
+            LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
     nextjs-frontend:
         pull_policy: build
