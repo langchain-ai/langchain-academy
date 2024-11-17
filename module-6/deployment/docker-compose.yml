@@ -26,7 +26,7 @@ services:
             retries: 5
             interval: 5s
     langgraph-api:
-        image: "my-image"
+        image: langchain/langgraph-api:3.12
         ports:
             - "8123:8000"
         depends_on:
@@ -47,10 +47,10 @@ services:
             - CHOKIDAR_USEPOLLING=true
         build:
             dockerfile: Dockerfile.dev
-            context: frontend
+            context: frontend/nextjs
         volumes:
             - /app/node_modules
-            - ./frontend:/app
+            - ./frontend/nextjs:/app
         restart: always
         ports:
             - 5000:3000
