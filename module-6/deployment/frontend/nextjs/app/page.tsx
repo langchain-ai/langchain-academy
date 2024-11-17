@@ -5,8 +5,6 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { startLanggraphResearch } from '../components/Langgraph/Langgraph';
 import findDifferences from '../helpers/findDifferences';
 import { Data, ChatBoxSettings, QuestionData } from '../types/data';
-import { preprocessOrderedData } from '../utils/dataProcessing';
-import { ResearchResults } from '../components/ResearchResults';
 
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
