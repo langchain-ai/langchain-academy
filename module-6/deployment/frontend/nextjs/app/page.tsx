@@ -44,7 +44,7 @@ export default function Home() {
     
     const storedConfig = localStorage.getItem('apiVariables');
     const apiVariables = storedConfig ? JSON.parse(storedConfig) : {};
-    const langgraphHostUrl = 'http:localhost:8123'
+    const langgraphHostUrl = 'http://localhost:8123'
 
     if (langgraphHostUrl) {
       let { streamResponse, host, thread_id } = await startLanggraphResearch(newQuestion, chatBoxSettings.report_source, langgraphHostUrl);
