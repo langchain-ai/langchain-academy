@@ -5,19 +5,19 @@ import "./globals.css";
 
 const inter = Lexend({ subsets: ["latin"] });
 
-let title = "GPT Researcher";
+let title = "Task Maistro";
 let description =
   "A research assistant vanquishing hallucinations";
-let url = "https://github.com/assafelovic/gpt-researcher";
-let ogimage = "/favicon.ico";
-let sitename = "GPT Researcher";
+let url = "https://github.com/langchain-ai/langchain-academy";
+let ogimage = "/langchain-favicon.ico";
+let sitename = "Task Maistro";
 
 export const metadata: Metadata = {
   metadataBase: new URL(url),
   title,
   description,
   icons: {
-    icon: "/favicon.ico",
+    icon: "/langchain-favicon.ico",
   },
   openGraph: {
     images: [ogimage],

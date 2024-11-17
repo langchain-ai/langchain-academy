@@ -22,7 +22,7 @@ const Hero: FC<THeroProps> = ({
       <div className="flex flex-col items-center justify-center">
         <div className="landing flex flex-col items-center">
           <h1 className="text-4xl font-extrabold text-center lg:text-7xl">
-            Say Goodbye to <br />
+            AI <br />
             <span
               style={{
                 backgroundImage: 'linear-gradient(to right, #9867F0, #ED4E50)',
@@ -30,11 +30,11 @@ const Hero: FC<THeroProps> = ({
                 WebkitTextFillColor: 'transparent',
               }}
             >
-              Hours of Research
+              that remembers
             </span>
           </h1>
           <h2 className="text-xl font-light text-center px-4 mb-10 text-gray-300">
-            Say Hello to GPT Researcher, your AI mate for rapid insights and comprehensive research
+            Say Hello to Task Maistro, your personal AI Assistant with long-term memory
           </h2>
         </div>
 
