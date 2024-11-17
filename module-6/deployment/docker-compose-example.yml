@@ -39,3 +39,18 @@ services:
             OPENAI_API_KEY: "xxx"
             LANGSMITH_API_KEY: "xxx"
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
+    nextjs-frontend:
+        pull_policy: build
+        image: task_maistro/frontend
+        stdin_open: true
+        environment:
+            - CHOKIDAR_USEPOLLING=true
+        build:
+            dockerfile: Dockerfile.dev
+            context: frontend
+        volumes:
+            - /app/node_modules
+            - ./frontend:/app
+        restart: always
+        ports:
+            - 5000:3000
