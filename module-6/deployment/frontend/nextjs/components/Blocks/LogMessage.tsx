@@ -26,7 +26,7 @@ const LogMessage: React.FC<LogMessageProps> = ({ logs }) => {
         if (message.type === 'report' || message.type === 'differences') {
           return (
             <div key={index} className="w-full max-w-4xl mx-auto rounded-lg pt-2 mt-3 pb-2 px-4 bg-gray-900 shadow-md">
-              <p className="py-3 text-base leading-relaxed text-white">
+              <p className="py-3 text-base leading-relaxed text-white log-message">
                 {message.output}
               </p>
             </div>
