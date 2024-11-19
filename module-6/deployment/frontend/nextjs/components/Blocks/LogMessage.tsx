@@ -1,96 +1,50 @@
 // LogMessage.tsx
-import Accordion from './Accordion';
-import { useEffect, useState } from 'react';
-import { remark } from 'remark';
-import html from 'remark-html';
-
-type ProcessedData = {
-  field: string;
-  htmlContent: string;
-  isMarkdown: boolean;
-};
-
-type Log = {
-  header: string;
-  text: string;
-  processedData?: ProcessedData[];
-  metadata?: any;
-};
-
 interface LogMessageProps {
-  logs: Log[];
+  logs: {
+    type: string;
+    content?: string;
+    output?: string;
+    link?: string;
+    tool_calls?: any[];
+  }[];
 }
 
 const LogMessage: React.FC<LogMessageProps> = ({ logs }) => {
-  const [processedLogs, setProcessedLogs] = useState<Log[]>([]);
-
-  useEffect(() => {
-    const processLogs = async () => {
-      if (!logs) return;
-      
-      const newLogs = await Promise.all(
-        logs.map(async (log) => {
-          try {
-            if (log.header === 'differences' && log.text) {
-              const data = JSON.parse(log.text).data;
-              const processedData = await Promise.all(
-                Object.keys(data).map(async (field) => {
-                  const fieldValue = data[field].after || data[field].before;
-                  if (!plainTextFields.includes(field)) {
-                    const htmlContent = await markdownToHtml(fieldValue);
-                    return { field, htmlContent, isMarkdown: true };
-                  }
-                  return { field, htmlContent: fieldValue, isMarkdown: false };
-                })
-              );
-              return { ...log, processedData };
-            }
-            return log;
-          } catch (error) {
-            console.error('Error processing log:', error);
-            return log;
-          }
-        })
-      );
-      setProcessedLogs(newLogs);
-    };
-
-    processLogs();
-  }, [logs]);
-
   return (
     <>
-      {processedLogs.map((log, index) => {
-        if (log.header === 'subquery_context_window' || log.header === 'differences') {
-          return <Accordion key={index} logs={[log]} />;
-        } else if (log.header !== 'selected_images' && log.header !== 'scraping_images') {
+      {logs.map((message, index) => {
+        if (message.type === 'langgraphButton') {
           return (
-            <div
-              key={index}
-              className="w-full max-w-4xl mx-auto rounded-lg pt-2 mt-3 pb-2 px-4 bg-gray-900 shadow-md"
-            >
-              <p className="py-3 text-base leading-relaxed text-white dark:text-white">
-                {log.text}
+            <div key={index} className="w-full max-w-4xl mx-auto rounded-lg pt-2 mt-3 pb-2 px-4 bg-gray-900 shadow-md">
+              <a href={message.link} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
+                View in Langsmith
+              </a>
+            </div>
+          );
+        }
+
+        if (message.type === 'report' || message.type === 'differences') {
+          return (
+            <div key={index} className="w-full max-w-4xl mx-auto rounded-lg pt-2 mt-3 pb-2 px-4 bg-gray-900 shadow-md">
+              <p className="py-3 text-base leading-relaxed text-white">
+                {message.output}
               </p>
             </div>
           );
         }
-        return null;
+
+        return (
+          <div key={index} className="w-full max-w-4xl mx-auto rounded-lg pt-2 mt-3 pb-2 px-4 bg-gray-900 shadow-md">
+            <p className={`py-3 text-base leading-relaxed ${
+              message.type === 'question' ? 'text-blue-300' : 'text-white'
+            }`}>
+              {message.content}
+            </p>
+          </div>
+        );
       })}
     </>
   );
 };
-
-const markdownToHtml = async (markdown: string): Promise<string> => {
-  try {
-    const result = await remark().use(html).process(markdown);
-    return result.toString();
-  } catch (error) {
-    console.error('Error converting Markdown to HTML:', error);
-    return ''; // Handle error gracefully, return empty string or default content
-  }
-};
-
-const plainTextFields = ['task', 'sections', 'headers', 'sources', 'research_data'];
 
 export default LogMessage;

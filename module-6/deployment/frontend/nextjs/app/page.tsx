@@ -3,15 +3,15 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { startLanggraphResearch } from '../components/Langgraph/Langgraph';
 import findDifferences from '../helpers/findDifferences';
-import { ChatBoxSettings, QuestionData } from '../types/data';
+import { Data, ChatBoxSettings, QuestionData } from '../types/data';
 
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";
 import InputArea from "@/components/Blocks/InputArea";
-import AgentLogs from "@/components/Blocks/AgentLogs";
 import HumanFeedback from "@/components/HumanFeedback";
 import LoadingDots from "@/components/LoadingDots";
+import LogMessage from "@/components/Blocks/LogMessage";
 
 export default function Home() {
   const [promptValue, setPromptValue] = useState("");
@@ -135,11 +135,12 @@ export default function Home() {
           <div className="flex h-full w-full grow flex-col justify-between">
             <div className="container w-full space-y-2">
               <div className="container space-y-2 task-components">
-                <AgentLogs
-                  agentLogs={orderedData}
-                  answer={answer}
-                  allLogs={allLogs}
+              {orderedData.map((message, index) => (
+                <LogMessage 
+                  key={index}
+                  logs={[message]}  // Wrap message in array since LogMessage expects logs array
                 />
+              ))}
               </div>
 
               {showHumanFeedback && (
