@@ -563,6 +563,20 @@ files = [
 ]
 
 [[package]]
+name = "click"
+version = "8.1.7"
+description = "Composable command line interface toolkit"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -1630,6 +1644,23 @@ files = [
 [package.dependencies]
 aiosqlite = ">=0.20.0,<0.21.0"
 langgraph-checkpoint = ">=2.0.2,<3.0.0"
+
+[[package]]
+name = "langgraph-cli"
+version = "0.1.55"
+description = "CLI for interacting with LangGraph API"
+optional = false
+python-versions = "<4.0.0,>=3.9.0"
+files = [
+    {file = "langgraph_cli-0.1.55-py3-none-any.whl", hash = "sha256:ef42daea8c7bab2b14361f991297c42867eb2e0c13e243bee4f2a43275a1abc7"},
+    {file = "langgraph_cli-0.1.55.tar.gz", hash = "sha256:791007ec3f4ed50b2f9acac252cc4eb6f6d8a97f5dc90f4d5cc2bd3ebf048bf5"},
+]
+
+[package.dependencies]
+click = ">=8.1.7,<9.0.0"
+
+[package.extras]
+inmem = ["langgraph-api-inmem (>=0.0.3,<0.1.0)"]
 
 [[package]]
 name = "langgraph-sdk"
@@ -3800,4 +3831,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "3.11.10"
-content-hash = "63b548f192c373fc0461f9e0656e3f83174b1dabaf219074fb57e5f28b231976"
+content-hash = "efd2188fde4dfbbe901fe5f9d4622cb9e355006e368a17ae59b9e0160d1e21e7"
