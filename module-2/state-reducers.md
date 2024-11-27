@@ -67,31 +67,39 @@ return {"foo": state['foo'] + 1}
 
 例えば、リストを結合し、入力の片方または両方が`None`の場合を処理するカスタムreducerロジックを定義してみましょう。
 
+「node_1」に値 2 を追加します。
+
+次に、カスタム レデューサーを試してみましょう。エラーがスローされていないことがわかります。
+
 ## Messages
 
 モジュール1では、組み込みのreducer `add_messages`を使用して状態内のメッセージを処理する方法を示しました。
 
-また、[メッセージを扱う場合は`MessagesState`が便利なショートカットである](https://langchain-ai.github.io/langgraph/concepts/low_level/#messagesstate)ことも示しました。
+また、[メッセージを操作する場合は`MessagesState`が便利なショートカットである](https://langchain-ai.github.io/langgraph/concepts/low_level/#messagesstate)ことも示しました。
 
 * `MessagesState`には組み込みの`messages`キーがあります
-* このキーには組み込みの`add_messages` reducerもあります
+* このキーには`add_messages` reducerも組み込まれています
 
-これらは同等です。
+これらは2つは同等です。
 
-簡潔にするため、`from langgraph.graph import MessagesState`を使用して`MessagesState`クラスを使います。
+簡潔にするため、`from langgraph.graph import MessagesState` 経由で `MessagesState` クラスを使用します。
+
+「add_messages」リデューサーの使用法についてもう少し詳しく説明しましょう。
+
+したがって、`add_messages` を使用すると、状態の `messages` キーにメッセージを追加できることがわかります。
 
 ## Re-writing
 
 `add_messages` reducerを使用する際の便利なテクニックをいくつか紹介します。
 
-既存の`messages`リストに存在するものと同じIDのメッセージを渡すと、上書きされます！
+「メッセージ」リスト内の既存のメッセージと同じ ID を持つメッセージを渡すと、そのメッセージは上書きされます。
 
 ## Removal
 
-`add_messages`は[メッセージの削除も可能](https://langchain-ai.github.io/langgraph/how-tos/memory/delete-messages/)です。
+`add_messages` は [メッセージの削除を有効にする](https://langchain-ai.github.io/langgraph/how-tos/memory/delete-messages/) こともできます。 
 
-このために、`langchain_core`から[RemoveMessage](https://api.python.langchain.com/en/latest/messages/langchain_core.messages.modifier.RemoveMessage.html)を使用します。
+このためには、`langchain_core` の [RemoveMessage](https://api.python.langchain.com/en/latest/messages/langchain_core.messages.modifier.RemoveMessage.html) を使用するだけです。
 
-reducerによって`delete_messages`で指定されたメッセージID(1と2)が削除されることがわかります。
+「delete_messages」に示されているように、メッセージ ID 1 と 2 がリデューサーによって削除されていることがわかります。
 
-これについては後でもっと実践的に見ていきます。
+これが実際に適用されるのはもう少し後になります。
