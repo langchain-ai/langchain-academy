@@ -43,17 +43,17 @@ return {"foo": state['foo'] + 1}
 
 ## Reducers
 
-[Reducers](https://langchain-ai.github.io/langgraph/concepts/low_level/#reducers)がこの問題に対処する一般的な方法を提供します。
+[Reducers](https://langchain-ai.github.io/langgraph/concepts/low_level/#reducers) は、この問題に対処する一般的な方法を提供します。
 
-これらは更新の実行方法を指定します。
+更新の実行方法を指定します。
 
-`Annotated`型を使用してreducer関数を指定できます。
+`Annotated` 型を使用してリデューサー関数を指定できます。 
 
-例えば、この場合は各ノードから返された値を上書きするのではなく、リストに追加しましょう。
+たとえば、この場合、各ノードから返された値を上書きするのではなく追加してみましょう。
 
-そのためのreducerが必要です:`operator.add`はPythonの組み込みoperatorモジュールの関数です。
+これを実行できるリデューサーが必要です。「operator.add」は、Python の組み込み演算子モジュールの関数です。
 
-`operator.add`をリストに適用すると、リストの連結が実行されます。
+`operator.add` をリストに適用すると、リストの連結が実行されます。
 
 ノード 2 と 3 の更新は同じステップにあるため、同時に実行されることがわかります。
 
