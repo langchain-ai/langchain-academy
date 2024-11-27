@@ -87,11 +87,11 @@ It's easy to sign up and offers a very generous free tier. Some lessons (in Modu
 Graphs for LangGraph Studio are in the `module-x/studio/` folders.
 
 * To use Studio, you will need to create a .env file with the relevant API keys
-* Run this from the command line to create these files for module 1 to 4, as an example:
+* Run this from the command line to create these files for module 1 to 5, as an example:
 ```
-$ for i in {1..4}; do
+for i in {1..5}; do
   cp module-$i/studio/.env.example module-$i/studio/.env
   echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-$i/studio/.env
 done
-$ echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
+echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
 ```
