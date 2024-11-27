@@ -55,6 +55,12 @@ return {"foo": state['foo'] + 1}
 
 `operator.add`をリストに適用すると、リストの連結が実行されます。
 
+ノード 2 と 3 の更新は同じステップにあるため、同時に実行されることがわかります。
+
+ここで、「foo」に「None」を渡すとどうなるかを見てみましょう。
+
+リデューサー `operator.add` が入力として `NoneType` パスを `node_1` のリストに連結しようとするため、エラーが発生します。
+
 ## Custom Reducers 
 
 このようなケースに対応するために、[カスタムreducerを定義することもできます](https://langchain-ai.github.io/langgraph/how-tos/subgraph/#custom-reducer-functions-to-manage-state)。
