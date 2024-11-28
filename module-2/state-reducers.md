@@ -2,15 +2,15 @@
 
 ## Review
 
-LangGraphの状態スキーマを定義する方法として、`TypedDict`、`Pydantic`、`Dataclasses`といういくつかの異なる方法を説明しました。
+LangGraphのstate schemaを定義する方法として、`TypedDict`、`Pydantic`、`Dataclasses`といういくつかの異なる方法を説明しました。
 
 ## Goals
 
-今回は、状態スキーマの特定のキー/チャネルにおける状態の更新方法を指定するreducerについて深く掘り下げていきます。
+今回は、state schemaの特定のキー/チャネルにおける状態の更新方法を指定するreducerについて深く掘り下げていきます。
 
 ## Default overwriting state
 
-`TypedDict`を状態スキーマとして使ってみましょう。
+`TypedDict`をstate schemaとして使ってみましょう。
 
 [コードブロックについては原文のまま]
 

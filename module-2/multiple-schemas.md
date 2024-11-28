@@ -2,7 +2,7 @@
 
 ## Review 
 
-状態スキーマとreducersについて説明しました。
+LangGraph の state schemaとreducersについて説明しました。
 
 通常、すべてのグラフノードは単一のスキーマとやり取りします。
 
