@@ -46,11 +46,11 @@ graph state schemaとreducerのカスタマイズ方法について学んでき�
 
 モジュール1の最後で紹介したように、これに対処するために[persistence](https://langchain-ai.github.io/langgraph/how-tos/persistence/)を使用できます!
 
-LangGraphは各ステップ後にグラフ状態を自動的に保存するチェックポインターを使用できます。
+LangGraphは各ステップ後にgraph stateを自動的に保存するチェックポインターを使用できます。
 
 この組み込みの永続化レイヤーによってメモリが提供され、LangGraphは最後の状態更新から再開できます。
 
-以前示したように、最も扱いやすいのは`MemorySaver`で、これはグラフ状態用のインメモリキーバリューストアです。
+以前示したように、最も扱いやすいのは`MemorySaver`で、これはgraph state用のインメモリキーバリューストアです。
 
 チェックポインターを使用してグラフをコンパイルするだけで、グラフにメモリが確保されます。
 
