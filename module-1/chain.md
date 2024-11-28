@@ -63,13 +63,13 @@ Pythonの`function`を`ChatModel.bind_tools(function)`に渡すだけです。
 
 グラフの実行時に、`messages`状態キーにメッセージを追加したいと考えています。
 
-これにはリデューサー関数を使用して対処できます。
+これにはreducer関数を使用して対処できます。
 
-リデューサーを使用すると、状態の更新方法を指定できます。
+reducerを使用すると、状態の更新方法を指定できます。
 
-リデューサー関数が指定されていない場合、更新は以前の値を上書きすると想定されます。
+reducer関数が指定されていない場合、更新は以前の値を上書きすると想定されます。
 
-メッセージを追加するには、事前に用意された`add_messages`リデューサーを使用できます。
+メッセージを追加するには、事前に用意された`add_messages`reducerを使用できます。
 
 これにより、メッセージが既存のメッセージリストに追加されることが保証されます。
 
@@ -78,6 +78,6 @@ Pythonの`function`を`ChatModel.bind_tools(function)`に渡すだけです。
 `MessagesState`は以下のように定義されています:
 * 事前に組み込まれた単一の`messages`キーを持つ
 * これは`AnyMessage`オブジェクトのリスト
-* `add_messages`リデューサーを使用
+* `add_messages`reducerを使用
 
 通常は`MessagesState`を使用します。上記のようにカスタムの`TypedDict`を定義するよりも簡潔だからです。

@@ -47,11 +47,11 @@ return {"foo": state['foo'] + 1}
 
 更新の実行方法を指定します。
 
-`Annotated` 型を使用してリデューサー関数を指定できます。 
+`Annotated` 型を使用してreducer関数を指定できます。 
 
 たとえば、この場合、各ノードから返された値を上書きするのではなく追加してみましょう。
 
-これを実行できるリデューサーが必要です。「operator.add」は、Python の組み込み演算子モジュールの関数です。
+これを実行できるreducerが必要です。「operator.add」は、Python の組み込み演算子モジュールの関数です。
 
 `operator.add` をリストに適用すると、リストの連結が実行されます。
 
@@ -59,7 +59,7 @@ return {"foo": state['foo'] + 1}
 
 ここで、「foo」に「None」を渡すとどうなるかを見てみましょう。
 
-リデューサー `operator.add` が入力として `NoneType` パスを `node_1` のリストに連結しようとするため、エラーが発生します。
+reducer `operator.add` が入力として `NoneType` パスを `node_1` のリストに連結しようとするため、エラーが発生します。
 
 ## Custom Reducers 
 
@@ -84,7 +84,7 @@ return {"foo": state['foo'] + 1}
 
 簡潔にするため、`from langgraph.graph import MessagesState` 経由で `MessagesState` クラスを使用します。
 
-「add_messages」リデューサーの使用法についてもう少し詳しく説明しましょう。
+「add_messages」reducerの使用法についてもう少し詳しく説明しましょう。
 
 したがって、`add_messages` を使用すると、状態の `messages` キーにメッセージを追加できることがわかります。
 
@@ -100,6 +100,6 @@ return {"foo": state['foo'] + 1}
 
 このためには、`langchain_core` の [RemoveMessage](https://api.python.langchain.com/en/latest/messages/langchain_core.messages.modifier.RemoveMessage.html) を使用するだけです。
 
-「delete_messages」に示されているように、メッセージ ID 1 と 2 がリデューサーによって削除されていることがわかります。
+「delete_messages」に示されているように、メッセージ ID 1 と 2 がreducerによって削除されていることがわかります。
 
 これが実際に適用されるのはもう少し後になります。
