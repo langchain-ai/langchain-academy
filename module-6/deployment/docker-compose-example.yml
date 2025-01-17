@@ -9,6 +9,8 @@ services:
             interval: 5s
             timeout: 1s
             retries: 5
+        ports:
+            - "6379:6379"
     langgraph-postgres:
         image: postgres:16
         ports:
