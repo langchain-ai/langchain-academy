@@ -133,6 +133,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+lc-academy-env/
 
 # Spyder project settings
 .spyderproject
@@ -217,3 +218,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+module-6/deployment/docker-compose.yml

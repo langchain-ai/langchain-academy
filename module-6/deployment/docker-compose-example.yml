@@ -9,10 +9,12 @@ services:
             interval: 5s
             timeout: 1s
             retries: 5
+        ports:
+            - "6379:6379"
     langgraph-postgres:
         image: postgres:16
         ports:
-            - "5433:5432"
+            - "5432:5432"
         environment:
             POSTGRES_DB: postgres
             POSTGRES_USER: postgres
@@ -36,6 +38,6 @@ services:
                 condition: service_healthy
         environment:
             REDIS_URI: redis://langgraph-redis:6379
-            OPENAI_API_KEY: "xxx"
-            LANGSMITH_API_KEY: "xxx"
+            OPENAI_API_KEY: "your_openai_api_key"
+            LANGSMITH_API_KEY: "your_langchain_api_key"
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
