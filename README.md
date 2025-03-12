@@ -79,15 +79,27 @@ It's easy to sign up and offers a very generous free tier. Some lessons (in Modu
 
 ### Set up LangGraph Studio
 
-* Currently, Studio only has macOS support and needs Docker Desktop running.
-* Download the latest `.dmg` file [here](https://github.com/langchain-ai/langgraph-studio?tab=readme-ov-file#download)
-* Install Docker desktop for Mac [here](https://docs.docker.com/engine/install/)
+* LangGraph Studio is a custom IDE for viewing and testing agents.
+* Studio can be run locally and opened in your browser on Mac, Windows, and Linux.
+* See documentation [here](https://langchain-ai.github.io/langgraph/concepts/langgraph_studio/#local-development-server) on the local Studio development server and [here](https://langchain-ai.github.io/langgraph/how-tos/local-studio/#run-the-development-server). 
+* Graphs for LangGraph Studio are in the `module-x/studio/` folders.
+* To start the local development server, run the following command in your terminal in the `/studio` directory each module:
 
-### Running Studio
-Graphs for LangGraph Studio are in the `module-x/studio/` folders.
+```
+langgraph dev
+```
+
+You should see the following output:
+```
+- 🚀 API: http://127.0.0.1:2024
+- 🎨 Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+- 📚 API Docs: http://127.0.0.1:2024/docs
+```
+
+Open your browser and navigate to the Studio UI: `https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024`.
 
 * To use Studio, you will need to create a .env file with the relevant API keys
-* Run this from the command line to create these files for module 1 to 5, as an example:
+* Run this from the command line to create these files for module 1 to 6, as an example:
 ```
 for i in {1..6}; do
   cp module-$i/studio/.env.example module-$i/studio/.env
