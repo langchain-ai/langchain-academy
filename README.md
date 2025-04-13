@@ -99,9 +99,9 @@ You should see the following output:
 Open your browser and navigate to the Studio UI: `https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024`.
 
 * To use Studio, you will need to create a .env file with the relevant API keys
-* Run this from the command line to create these files for module 1 to 6, as an example:
+* Run this from the command line to create these files for module 1 to 5, as an example:
 ```
-for i in {1..6}; do
+for i in {1..5}; do
   cp module-$i/studio/.env.example module-$i/studio/.env
   echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-$i/studio/.env
 done
