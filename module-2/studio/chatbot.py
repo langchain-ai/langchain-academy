@@ -1,3 +1,4 @@
+from typing import Literal
 from langchain_core.messages import HumanMessage, SystemMessage, RemoveMessage
 from langgraph.graph import MessagesState
 from langgraph.graph import StateGraph, START, END
@@ -32,7 +33,7 @@ def call_model(state: State):
     return {"messages": response}
 
 # Determine whether to end or summarize the conversation
-def should_continue(state: State):
+def should_continue(state: State) -> Literal["summarize_conversation", "__end__"]:
     
     """Return the next node to execute."""
     
