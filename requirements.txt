@@ -11,3 +11,4 @@ tavily-python
 wikipedia
 trustcall
 langgraph-cli[inmem]
+langchain-tavily
