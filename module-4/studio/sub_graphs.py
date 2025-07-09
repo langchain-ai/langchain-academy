@@ -37,7 +37,7 @@ def generate_summary(state):
     fa_summary = "Poor quality retrieval of Chroma documentation."
     return {"fa_summary": fa_summary, "processed_logs": [f"failure-analysis-on-log-{failure['id']}" for failure in failures]}
 
-fa_builder = StateGraph(input=FailureAnalysisState,output=FailureAnalysisOutputState)
+fa_builder = StateGraph(FailureAnalysisState,output_schema=FailureAnalysisOutputState)
 fa_builder.add_node("get_failures", get_failures)
 fa_builder.add_node("generate_summary", generate_summary)
 fa_builder.add_edge(START, "get_failures")
@@ -67,7 +67,7 @@ def send_to_slack(state):
     report = "foo bar baz"
     return {"report": report}
 
-qs_builder = StateGraph(input=QuestionSummarizationState,output=QuestionSummarizationOutputState)
+qs_builder = StateGraph(QuestionSummarizationState,output_schema=QuestionSummarizationOutputState)
 qs_builder.add_node("generate_summary", generate_summary)
 qs_builder.add_node("send_to_slack", send_to_slack)
 qs_builder.add_edge(START, "generate_summary")
