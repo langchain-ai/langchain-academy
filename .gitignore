@@ -218,4 +218,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# LangGraph API runtime files
+.langgraph_api/
+
 module-6/deployment/docker-compose.yml
