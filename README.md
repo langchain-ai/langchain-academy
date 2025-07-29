@@ -30,7 +30,7 @@ $ cd langchain-academy
 
 ### Create an environment and install dependencies
 
-#### Mac/Linux/WSL
+#### Using Mac/Linux/WSL
 
 ```bash
 python3 -m venv lc-academy-env
@@ -38,7 +38,7 @@ source lc-academy-env/bin/activate
 pip install -r requirements.txt
 ```
 
-#### Windows Powershell
+#### Using Windows Powershell
 
 ```powershell
 PS> python3 -m venv lc-academy-env
@@ -60,7 +60,7 @@ jupyter notebook
 Briefly going over how to set up environment variables. You can also
 use a `.env` file with `python-dotenv` library.
 
-#### Mac/Linux/WSL environment variables
+#### On Mac/Linux/WSL
 
 ```bash
 export API_ENV_VAR="your-api-key-here"
