@@ -66,7 +66,7 @@ use a `.env` file with `python-dotenv` library.
 export API_ENV_VAR="your-api-key-here"
 ```
 
-#### Windows Powershell environment variables
+#### On Windows Powershell
 
 ```powershell
 PS> $env:API_ENV_VAR = "your-api-key-here"
