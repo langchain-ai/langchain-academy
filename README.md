@@ -49,7 +49,7 @@ PS> pip install -r requirements.txt
 
 ### Running notebooks
 
-If you don't have Jupyter set up, follow installation instructions [here](https://jupyter.org/install).
+If you don't have Jupyter set up, follow [Jupyter installation instructions](https://jupyter.org/install).
 
 ```bash
 jupyter notebook
@@ -74,20 +74,20 @@ PS> $env:API_ENV_VAR = "your-api-key-here"
 
 ### Set OpenAI API key
 
-* If you don't have an OpenAI API key, you can sign up [here](https://openai.com/index/openai-api/).
+* If you don't have an OpenAI API key, you can [sign up for OpenAI API](https://openai.com/index/openai-api/).
 * Set `OPENAI_API_KEY` in your environment
 
 ### Sign up and Set LangSmith API
 
-* Sign up for LangSmith [here](https://smith.langchain.com/), find out more about LangSmith
-* and how to use it within your workflow [here](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/)!
+* [Sign up for LangSmith](https://smith.langchain.com/), find out more about LangSmith
+* and how to use it within your workflow [on the LangSmith website](https://www.langchain.com/langsmith), and relevant library [docs](https://docs.smith.langchain.com/)!
 * Set `LANGCHAIN_API_KEY`, `LANGCHAIN_TRACING_V2=true` in your environment
 
 ### Set up Tavily API for web search
 
 * Tavily Search API is a search engine optimized for LLMs and RAG, aimed at efficient,
 quick, and persistent search results.
-* You can sign up for an API key [here](https://tavily.com/).
+* You can [sign up for a Tavily API key](https://tavily.com/).
 It's easy to sign up and offers a very generous free tier. Some lessons (in Module 4) will use Tavily.
 
 * Set `TAVILY_API_KEY` in your environment.
@@ -96,7 +96,7 @@ It's easy to sign up and offers a very generous free tier. Some lessons (in Modu
 
 * LangGraph Studio is a custom IDE for viewing and testing agents.
 * Studio can be run locally and opened in your browser on Mac, Windows, and Linux.
-* See documentation [here](https://langchain-ai.github.io/langgraph/concepts/langgraph_studio/#local-development-server) on the local Studio development server and [here](https://langchain-ai.github.io/langgraph/how-tos/local-studio/#run-the-development-server).
+* See documentation [on the local Studio development server](https://langchain-ai.github.io/langgraph/concepts/langgraph_studio/#local-development-server) and [how to run the development server](https://langchain-ai.github.io/langgraph/how-tos/local-studio/#run-the-development-server).
 * Graphs for LangGraph Studio are in the `module-x/studio/` folders.
 * To start the local development server, run the following command in your terminal in the `/studio` directory each module:
 
