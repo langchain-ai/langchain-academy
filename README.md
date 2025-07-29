@@ -60,13 +60,13 @@ jupyter notebook
 Briefly going over how to set up environment variables. You can also
 use a `.env` file with `python-dotenv` library.
 
-#### Mac/Linux/WSL
+#### Mac/Linux/WSL environment variables
 
 ```bash
 export API_ENV_VAR="your-api-key-here"
 ```
 
-#### Windows Powershell
+#### Windows Powershell environment variables
 
 ```powershell
 PS> $env:API_ENV_VAR = "your-api-key-here"
