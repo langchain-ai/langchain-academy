@@ -39,5 +39,5 @@ services:
         environment:
             REDIS_URI: redis://langgraph-redis:6379
             OPENAI_API_KEY: "your_openai_api_key"
-            LANGSMITH_API_KEY: "your_langchain_api_key"
+            LANGSMITH_API_KEY: "your_langsmith_api_key"
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
