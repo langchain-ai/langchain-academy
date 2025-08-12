@@ -5,8 +5,9 @@ langgraph-checkpoint-sqlite
 langsmith
 langchain-community
 langchain-core
-langchain-openai
+langchain-anthropic
 notebook
+python-dotenv
 tavily-python
 wikipedia
 trustcall
