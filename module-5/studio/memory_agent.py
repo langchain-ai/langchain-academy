@@ -18,6 +18,9 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.store.base import BaseStore
 from langgraph.store.memory import InMemoryStore
 
+across_thread_memory = InMemoryStore()
+checkpointer = MemorySaver()
+
 import configuration
 
 ## Utilities 
@@ -374,7 +377,7 @@ def route_message(state: MessagesState, config: RunnableConfig, store: BaseStore
             raise ValueError
 
 # Create the graph + all nodes
-builder = StateGraph(MessagesState, config_schema=configuration.Configuration)
+builder = StateGraph(MessagesState, context_schema=configuration.Configuration)
 
 # Define the flow of the memory extraction process
 builder.add_node(task_mAIstro)
@@ -390,4 +393,4 @@ builder.add_edge("update_profile", "task_mAIstro")
 builder.add_edge("update_instructions", "task_mAIstro")
 
 # Compile the graph
-graph = builder.compile()
+graph = builder.compile(checkpointer=checkpointer, store=across_thread_memory)
