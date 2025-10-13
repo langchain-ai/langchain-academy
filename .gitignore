@@ -54,6 +54,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+module-1/studio/.langgraph_api
 
 # Translations
 *.mo
