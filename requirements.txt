@@ -7,7 +7,8 @@ langchain-community
 langchain-core
 langchain-openai
 notebook
-tavily-python
+langchain-tavily
 wikipedia
 trustcall
 langgraph-cli[inmem]
+
