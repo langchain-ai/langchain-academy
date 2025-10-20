@@ -6,7 +6,7 @@ from langchain_core.documents import Document
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from langchain_community.document_loaders import WikipediaLoader
-from langchain_community.tools import TavilySearchResults
+from langchain_tavily import TavilySearch  # updated 1.0
 
 from langchain_openai import ChatOpenAI
 
@@ -24,8 +24,9 @@ def search_web(state):
     """ Retrieve docs from web search """
 
     # Search
-    tavily_search = TavilySearchResults(max_results=3)
-    search_docs = tavily_search.invoke(state['question'])
+    tavily_search = TavilySearch(max_results=3)
+    data = tavily_search.invoke({"query": state['question']})
+    search_docs = data.get("results", data)
 
      # Format
     formatted_search_docs = "\n\n---\n\n".join(
