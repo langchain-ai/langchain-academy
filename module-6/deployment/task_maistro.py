@@ -372,7 +372,8 @@ def update_instructions(state: MessagesState, config: RunnableConfig, store: Bas
     return {"messages": [{"role": "tool", "content": "updated instructions", "tool_call_id":tool_calls[0]['id']}]}
 
 # Conditional edge
-def route_message(state: MessagesState, config: RunnableConfig, store: BaseStore) -> Literal[END, "update_todos", "update_instructions", "update_profile"]:
+#def route_message(state: MessagesState, config: RunnableConfig, store: BaseStore) -> Literal[END, "update_todos", "update_instructions", "update_profile"]:
+def route_message(state: MessagesState, config: RunnableConfig) -> Literal[END, "update_todos", "update_instructions", "update_profile"]:
 
     """Reflect on the memories and chat history to decide whether to update the memory collection."""
     message = state['messages'][-1]
