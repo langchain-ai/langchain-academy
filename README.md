@@ -24,19 +24,27 @@ $ cd langchain-academy
 Or, if you prefer, you can download a zip file [here](https://github.com/langchain-ai/langchain-academy/archive/refs/heads/main.zip).
 
 ### Create an environment and install dependencies
+
+**What is a virtual environment?** A virtual environment isolates your project's Python packages from your system Python and other projects. This prevents dependency conflicts and ensures everyone uses the same package versions.
+
+**Important:** You'll need to activate the virtual environment every time you open a new terminal session to use the installed packages (like `langgraph`).
+
 #### Mac/Linux/WSL
 ```
 $ python3 -m venv lc-academy-env
 $ source lc-academy-env/bin/activate
 $ pip install -r requirements.txt
 ```
+
 #### Windows Powershell
 ```
 PS> python3 -m venv lc-academy-env
 PS> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-PS> lc-academy-env\scripts\activate
+PS> .\lc-academy-env\Scripts\Activate.ps1
 PS> pip install -r requirements.txt
 ```
+
+**Note:** After activation, you should see `(lc-academy-env)` at the start of your terminal prompt. If you don't see it, the virtual environment isn't activated and commands like `langgraph` won't work.
 
 ### Running notebooks
 If you don't have Jupyter set up, follow the installation instructions [here](https://jupyter.org/install).
@@ -61,7 +69,7 @@ PS> $env:API_ENV_VAR = "your-api-key-here"
 
 ### Sign up and Set LangSmith API
 * Sign up for LangSmith [here](https://docs.langchain.com/langsmith/create-account-api-key#create-an-account-and-api-key), find out more about LangSmith and how to use it within your workflow [here](https://www.langchain.com/langsmith). 
-*  Set `LANGSMITH_API_KEY`, `LANGSMITH_TRACING_V2=true` `LANGSMITH_PROJECT="langchain-academy"`in your environment 
+*  Set `LANGSMITH_API_KEY`, `LANGSMITH_TRACING_V2="true"` `LANGSMITH_PROJECT="langchain-academy"`in your environment 
 *  If you are on the EU instance also set `LANGSMITH_ENDPOINT`="https://eu.api.smith.langchain.com" as well.
 
 ### Set up Tavily API for web search
@@ -79,6 +87,10 @@ It's easy to sign up and offers a very generous free tier. Some lessons (in Modu
 * Studio can be run locally and opened in your browser on Mac, Windows, and Linux.
 * See documentation [here](https://docs.langchain.com/langsmith/studio#local-development-server) on the local Studio development server. 
 * Graphs for LangGraph Studio are in the `module-x/studio/` folders for module 1-5.
+* **Important:** Before running `langgraph dev`, make sure your virtual environment is activated:
+  * **Windows PowerShell:** `.\lc-academy-env\Scripts\Activate.ps1`
+  * **Mac/Linux/WSL:** `source lc-academy-env/bin/activate`
+  * You should see `(lc-academy-env)` at the start of your terminal prompt when activated.
 * To start the local development server, run the following command in your terminal in the `/studio` directory in each module:
 
 ```
