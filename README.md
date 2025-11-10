@@ -11,9 +11,7 @@ In each module folder, you'll see a set of notebooks. A link to the LangChain Ac
 
 ### Python version
 
-To get the most out of this course, please ensure you're using Python 3.11 or later. 
-This version is required for optimal compatibility with LangGraph. If you're on an older version, 
-upgrading will ensure everything runs smoothly.
+Please make sure you're using a Python version higher than 3.11 but lower than 3.14, specifically 3.11, 3.12, or 3.13.
 ```
 python3 --version
 ```
