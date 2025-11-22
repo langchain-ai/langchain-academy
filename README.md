@@ -11,7 +11,7 @@ In each module folder, you'll see a set of notebooks. A link to the LangChain Ac
 
 ### Python version
 
-Please make sure you're using a Python version higher than 3.11 but lower than 3.14, specifically 3.11, 3.12, or 3.13.
+Make sure you're using Python version 3.11, 3.12, or 3.13.
 ```
 python3 --version
 ```
@@ -34,7 +34,7 @@ $ pip install -r requirements.txt
 ```
 PS> python3 -m venv lc-academy-env
 PS> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-PS> lc-academy-env\scripts\activate
+PS> .\lc-academy-env\Scripts\Activate.ps1
 PS> pip install -r requirements.txt
 ```
 
@@ -61,7 +61,7 @@ PS> $env:API_ENV_VAR = "your-api-key-here"
 
 ### Sign up and Set LangSmith API
 * Sign up for LangSmith [here](https://docs.langchain.com/langsmith/create-account-api-key#create-an-account-and-api-key), find out more about LangSmith and how to use it within your workflow [here](https://www.langchain.com/langsmith). 
-*  Set `LANGSMITH_API_KEY`, `LANGSMITH_TRACING_V2=true` `LANGSMITH_PROJECT="langchain-academy"`in your environment 
+*  Set `LANGSMITH_API_KEY`, `LANGSMITH_TRACING_V2="true"` `LANGSMITH_PROJECT="langchain-academy"`in your environment 
 *  If you are on the EU instance also set `LANGSMITH_ENDPOINT`="https://eu.api.smith.langchain.com" as well.
 
 ### Set up Tavily API for web search
@@ -79,7 +79,7 @@ It's easy to sign up and offers a very generous free tier. Some lessons (in Modu
 * Studio can be run locally and opened in your browser on Mac, Windows, and Linux.
 * See documentation [here](https://docs.langchain.com/langsmith/studio#local-development-server) on the local Studio development server. 
 * Graphs for LangGraph Studio are in the `module-x/studio/` folders for module 1-5.
-* To start the local development server, run the following command in your terminal in the `/studio` directory in each module:
+* To start the local development server, make sure your virtual environment is active and run the following command in your terminal in the `/studio` directory in each module:
 
 ```
 langgraph dev
