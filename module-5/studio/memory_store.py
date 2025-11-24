@@ -1,12 +1,18 @@
 from langchain_core.messages import SystemMessage
 from langchain_core.runnables.config import RunnableConfig
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.store.base import BaseStore
 import configuration
 
 # Initialize the LLM
-model = ChatOpenAI(model="gpt-4o", temperature=0) 
+model = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+)
 
 # Chatbot instruction
 MODEL_SYSTEM_MESSAGE = """You are a helpful assistant with memory that provides information about the user. 
@@ -35,10 +41,10 @@ Remember: Only include factual information directly stated by the user. Do not m
 
 Based on the chat history below, please update the user information:"""
 
-def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
 
+def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     """Load memory from the store and use it to personalize the chatbot's response."""
-    
+
     # Get configuration
     configurable = configuration.Configuration.from_runnable_config(config)
 
@@ -53,7 +59,7 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     # Extract the memory
     if existing_memory:
         # Value is a dictionary with a memory key
-        existing_memory_content = existing_memory.value.get('memory')
+        existing_memory_content = existing_memory.value.get("memory")
     else:
         existing_memory_content = "No existing memory found."
 
@@ -61,14 +67,14 @@ def call_model(state: MessagesState, config: RunnableConfig, store: BaseStore):
     system_msg = MODEL_SYSTEM_MESSAGE.format(memory=existing_memory_content)
 
     # Respond using memory as well as the chat history
-    response = model.invoke([SystemMessage(content=system_msg)]+state["messages"])
+    response = model.invoke([SystemMessage(content=system_msg)] + state["messages"])
 
     return {"messages": response}
 
-def write_memory(state: MessagesState, config: RunnableConfig, store: BaseStore):
 
+def write_memory(state: MessagesState, config: RunnableConfig, store: BaseStore):
     """Reflect on the chat history and save a memory to the store."""
-    
+
     # Get configuration
     configurable = configuration.Configuration.from_runnable_config(config)
 
@@ -82,20 +88,21 @@ def write_memory(state: MessagesState, config: RunnableConfig, store: BaseStore)
     # Extract the memory
     if existing_memory:
         # Value is a dictionary with a memory key
-        existing_memory_content = existing_memory.value.get('memory')
+        existing_memory_content = existing_memory.value.get("memory")
     else:
         existing_memory_content = "No existing memory found."
-        
+
     # Format the memory in the system prompt
     system_msg = CREATE_MEMORY_INSTRUCTION.format(memory=existing_memory_content)
-    new_memory = model.invoke([SystemMessage(content=system_msg)]+state['messages'])
+    new_memory = model.invoke([SystemMessage(content=system_msg)] + state["messages"])
 
-    # Overwrite the existing memory in the store 
+    # Overwrite the existing memory in the store
     key = "user_memory"
     store.put(namespace, key, {"memory": new_memory.content})
 
+
 # Define the graph
-builder = StateGraph(MessagesState,config_schema=configuration.Configuration)
+builder = StateGraph(MessagesState, config_schema=configuration.Configuration)
 builder.add_node("call_model", call_model)
 builder.add_node("write_memory", write_memory)
 builder.add_edge(START, "call_model")

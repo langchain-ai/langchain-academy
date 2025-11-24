@@ -8,27 +8,34 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_tavily import TavilySearch  # updated 1.0
 
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 from langgraph.graph import StateGraph, START, END
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0) 
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+)
+
 
 class State(TypedDict):
     question: str
     answer: str
     context: Annotated[list, operator.add]
 
+
 def search_web(state):
-    
-    """ Retrieve docs from web search """
+    """Retrieve docs from web search"""
 
     # Search
     tavily_search = TavilySearch(max_results=3)
-    data = tavily_search.invoke({"query": state['question']})
+    data = tavily_search.invoke({"query": state["question"]})
     search_docs = data.get("results", data)
 
-     # Format
+    # Format
     formatted_search_docs = "\n\n---\n\n".join(
         [
             f'<Document href="{doc["url"]}"/>\n{doc["content"]}\n</Document>'
@@ -36,17 +43,16 @@ def search_web(state):
         ]
     )
 
-    return {"context": [formatted_search_docs]} 
+    return {"context": [formatted_search_docs]}
+
 
 def search_wikipedia(state):
-    
-    """ Retrieve docs from wikipedia """
+    """Retrieve docs from wikipedia"""
 
     # Search
-    search_docs = WikipediaLoader(query=state['question'], 
-                                  load_max_docs=2).load()
+    search_docs = WikipediaLoader(query=state["question"], load_max_docs=2).load()
 
-     # Format
+    # Format
     formatted_search_docs = "\n\n---\n\n".join(
         [
             f'<Document source="{doc.metadata["source"]}" page="{doc.metadata.get("page", "")}"/>\n{doc.page_content}\n</Document>'
@@ -54,11 +60,11 @@ def search_wikipedia(state):
         ]
     )
 
-    return {"context": [formatted_search_docs]} 
+    return {"context": [formatted_search_docs]}
+
 
 def generate_answer(state):
-    
-    """ Node to answer a question """
+    """Node to answer a question"""
 
     # Get state
     context = state["context"]
@@ -66,20 +72,23 @@ def generate_answer(state):
 
     # Template
     answer_template = """Answer the question {question} using this context: {context}"""
-    answer_instructions = answer_template.format(question=question, 
-                                                       context=context)    
-    
+    answer_instructions = answer_template.format(question=question, context=context)
+
     # Answer
-    answer = llm.invoke([SystemMessage(content=answer_instructions)]+[HumanMessage(content=f"Answer the question.")])
-      
+    answer = llm.invoke(
+        [SystemMessage(content=answer_instructions)]
+        + [HumanMessage(content=f"Answer the question.")]
+    )
+
     # Append it to state
     return {"answer": answer}
+
 
 # Add nodes
 builder = StateGraph(State)
 
-# Initialize each node with node_secret 
-builder.add_node("search_web",search_web)
+# Initialize each node with node_secret
+builder.add_node("search_web", search_web)
 builder.add_node("search_wikipedia", search_wikipedia)
 builder.add_node("generate_answer", generate_answer)
 
