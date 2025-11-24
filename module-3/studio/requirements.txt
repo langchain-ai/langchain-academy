@@ -2,4 +2,4 @@ langgraph
 langgraph-prebuilt
 langchain-core
 langchain-community
-langchain-openai
+langchain-google-genai

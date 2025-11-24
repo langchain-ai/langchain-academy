@@ -5,7 +5,7 @@ langgraph-checkpoint-sqlite
 langsmith
 langchain-community
 langchain-core
-langchain-openai
+langchain-google-genai
 notebook
 langchain-tavily
 wikipedia
