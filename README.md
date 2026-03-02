@@ -77,7 +77,7 @@ It's easy to sign up and offers a very generous free tier. Some lessons (in Modu
 
 * Studio is a custom IDE for viewing and testing agents.
 * Studio can be run locally and opened in your browser on Mac, Windows, and Linux.
-* See documentation [here](https://docs.langchain.com/langsmith/studio#local-development-server) on the local Studio development server. 
+* See documentation [here](https://langchain-ai.github.io/langgraph/cloud/how-tos/studio/quick_start/#local-development-server) on the local Studio development server. 
 * Graphs for LangGraph Studio are in the `module-x/studio/` folders for module 1-5.
 * To start the local development server, make sure your virtual environment is active and run the following command in your terminal in the `/studio` directory in each module:
 
