@@ -54,6 +54,29 @@ Quick reference while we build the LangGraph graph, tools, and chat layer agains
 - Lists we append (e.g. messages, audit steps): use **`Annotated[list, operator.add]`** or the right reducer — don’t rely on last-write-wins by accident.
 - Single-value fields: default replace semantics is usually fine.
 
+### 3.5 Trim & filter messages (long-running chat, token budget)
+
+Our **`messages`** channel will grow forever if we only append. For Phase 5+ threads we should **bound what we send to the model** each turn: cost, latency, and context-window limits all depend on it.
+
+**Where in the graph:** Run trimming/filtering in a node **before** the LLM (or inside a small “prepare context” node) so checkpointed history can stay full while **model input** stays capped — or trim before writing back to state if we want the persisted thread to match what the model saw (product choice).
+
+**`trim_messages`** (`langchain_core.messages`): shrink history to **`max_tokens`** using a **`token_counter`** (pass our chat **`BaseLanguageModel`** for exact counts, or **`"approximate"`** on the hot path when near-enough is fine). Typical chat defaults:
+
+- **`strategy="last"`** — keep recent turns, drop old ones.
+- **`start_on="human"`** — avoid invalid histories (many models expect history to start with human or system+human).
+- **`include_system=True`** — keep the leading **`SystemMessage`** when we use one.
+
+Optional: **`end_on`** / **`allow_partial`** when we need stricter shape or to clip a huge single message.
+
+**`filter_messages`** (`langchain_core.messages`): drop noise **before** or **after** trim, depending on goal:
+
+- **`include_types`** / **`exclude_types`** — e.g. only **`human`** + **`ai`** for a slim replay (watch tool-call validity if we strip tool messages).
+- **`exclude_tool_calls`** — **`True`** or specific IDs to shed old tool **`AIMessage` / `ToolMessage`** pairs once we no longer need them in context (saves tokens when past turns are irrelevant).
+
+**Order of operations:** Often **filter** (remove classes we never want in the prompt) **then** **`trim_messages`** (enforce token ceiling). If we filter tool traces, we should ensure the remaining sequence is still **valid** for the model (tool messages only after their tool-calling AI turn).
+
+**Heavier option:** A **summarize** node that writes a rolling **`summary`** string (or message) into state and keeps only **summary + last N messages** — use when semantic memory of the full thread matters more than raw verbatim history.
+
 ---
 
 ## 4. Search API v2 — agent-facing discipline
@@ -139,5 +162,6 @@ Treat the taxonomy as the **functional contract** between:
 - **State schemas are product boundaries** — input/output filtering saves us from leaking internal keys to the client.
 - **Private state** — for handoffs between nodes, not for hiding PII from ourselves.
 - **Flags everywhere** — ship search and chat toggles independently.
+- **Trim then model** — `filter_messages` + `trim_messages` (or summarize + recent window) so long sessions don’t blow token usage or context limits.
 
 We can paste LangGraph code snippets from the academy notebooks (reducers, `StateGraph(..., input_schema=..., output_schema=...)`, private state edges) into an appendix here when we settle on package layout.
