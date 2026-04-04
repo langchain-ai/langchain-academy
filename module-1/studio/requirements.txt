@@ -3,4 +3,4 @@ langgraph-prebuilt
 langchain-core
 langchain-community
 langchain-openai
-
+aiohttp>=3.13.4
