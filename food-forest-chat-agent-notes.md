@@ -77,6 +77,26 @@ Optional: **`end_on`** / **`allow_partial`** when we need stricter shape or to c
 
 **Heavier option:** A **summarize** node that writes a rolling **`summary`** string (or message) into state and keeps only **summary + last N messages** — use when semantic memory of the full thread matters more than raw verbatim history.
 
+### 3.6 Persistent memory / storage (per user, per conversation)
+
+Academy reference: `module-2/chatbot-external-memory.ipynb` — **external checkpointer** (e.g. SQLite on disk) so graph state survives restarts; same ideas extend to Postgres in production.
+
+**What “persistent memory” means here:** LangGraph **checkpoints** the graph’s state (messages, custom fields like **`summary`**, flags, etc.) to a **saver** backend. We **`compile(..., checkpointer=...)`** and pass a **`thread_id`** on every **`invoke` / `stream`** so each **thread** is an isolated conversation timeline.
+
+**Per-user shape:** We treat **`config["configurable"]["thread_id"]`** as **our** conversation key — typically something we derive server-side, e.g. **`{user_id}:{conversation_id}`** or a stable UUID we issue when a chat session starts. Different **`thread_id`** ⇒ different checkpoint namespaces; same id across requests ⇒ resumed history. **`thread_id` is not auth** — we still verify the caller owns that conversation before loading or appending state.
+
+**Local / dev:** **`SqliteSaver`** over a file path (see notebook’s `state_db/example.db` pattern) is enough to prove persistence across kernel or process restarts.
+
+**Production entailments:**
+
+- **Store:** Prefer **Postgres** (or another supported checkpointer) for concurrency, backups, and ops we already run for the product — SQLite is a stepping stone, not our multi-instance default.
+- **Isolation:** One logical **conversation** per **`thread_id`**; enforce **tenant / user** boundaries in our API so we never mix checkpoints across accounts.
+- **Retention & compliance:** Define how long we keep threads, export/delete paths (GDPR-style requests), and whether **PII** in messages belongs in the same store as analytics — aligns with **`ff_chat_context_persistence`** and policy when we turn persistence on.
+- **Capacity:** Checkpoint rows grow with turns; pair persistence with **§3.5** (trim / filter / summarize) so **stored** history and **model** context stay intentional — we can store a long thread but still send only a bounded window to the LLM.
+- **Migrations & upgrades:** Checkpointer libraries evolve; we plan **schema / version** upgrades and test restore paths like any app database.
+
+**Inspecting state:** **`graph.get_state(config)`** (and related APIs) help debug “what the graph remembers” for a **`thread_id`** during development and support.
+
 ---
 
 ## 4. Search API v2 — agent-facing discipline
@@ -143,11 +163,13 @@ Treat the taxonomy as the **functional contract** between:
 - [ ] Streaming path tested (loading UI + SSE).
 - [ ] Search v2 shadow/beta behavior verified under flags.
 - [ ] No secrets in client state; server-only keys for Dgraph / Admin SDK paths.
+- [ ] If persistence is on: **`thread_id`** is server-issued / validated; retention and delete/export story matches policy; checkpointer store sized and backed up like our other DBs.
 
 ---
 
 ## 9. Docs / anchors in our repo (when we’re back in the product repo)
 
+- LangChain Academy — `module-2/chatbot-external-memory.ipynb` (SQLite checkpointer, `thread_id`, durable state).
 - Phase 04 — Search API development (migration, tuning, sessions).
 - Phase 02 step 04 — LangGraph agent package + LangSmith boundaries.
 - Query Gap Taxonomy — conversation spec.
@@ -163,5 +185,6 @@ Treat the taxonomy as the **functional contract** between:
 - **Private state** — for handoffs between nodes, not for hiding PII from ourselves.
 - **Flags everywhere** — ship search and chat toggles independently.
 - **Trim then model** — `filter_messages` + `trim_messages` (or summarize + recent window) so long sessions don’t blow token usage or context limits.
+- **Checkpoint + thread_id** — durable per-conversation state via a checkpointer; **`thread_id`** is ours to map to user/session and must be authorized, not guessed.
 
 We can paste LangGraph code snippets from the academy notebooks (reducers, `StateGraph(..., input_schema=..., output_schema=...)`, private state edges) into an appendix here when we settle on package layout.
