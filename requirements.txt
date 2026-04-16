@@ -2,9 +2,9 @@ langgraph
 langgraph-prebuilt
 langgraph-sdk
 langgraph-checkpoint-sqlite
-langsmith
+langsmith>=0.7.31
 langchain-community
-langchain-core
+langchain-core>=1.2.28
 langchain-openai
 notebook
 langchain-tavily
@@ -14,4 +14,4 @@ langgraph-cli[inmem]
 
 aiohttp>=3.13.4
 Pygments>=2.20.0
-cryptography>=46.0.6
+cryptography>=46.0.7
