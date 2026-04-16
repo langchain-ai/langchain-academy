@@ -1,5 +1,6 @@
 langgraph
-langchain-core
+langchain-core>=1.2.28
 langchain-community
 langchain-openai
+langsmith>=0.7.31
 aiohttp>=3.13.4
