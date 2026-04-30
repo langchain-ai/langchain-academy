@@ -103,3 +103,21 @@ for i in {1..5}; do
 done
 echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
 ```
+
+### Troubleshooting: `langgraph dev` and `print_text` / `langchain_core.utils`
+
+If `langgraph dev` suddenly fails everywhere (any `studio` folder) with an error like:
+
+`ImportError: cannot import name 'print_text' from 'langchain_core.utils'`
+
+the `langchain-core` install in our venv may be corrupted. On macOS this sometimes happens when files end up in duplicate folders (for example `utils 2` instead of `utils`) under `site-packages/langchain_core/`, so Python loads an incomplete package.
+
+With `lc-academy-env` activated, force a clean reinstall:
+
+```
+pip install --force-reinstall --no-cache-dir langchain-core
+```
+
+To match whatever version we had pinned or resolved before, we can check `pip show langchain-core` and reinstall that version explicitly, e.g. `pip install --force-reinstall --no-cache-dir "langchain-core==1.2.25"`.
+
+If stray `* 2` directories remain under `lc-academy-env/lib/python3.*/site-packages/langchain_core/`, we remove them after the reinstall—or recreate the venv and run `pip install -r requirements.txt` again.
