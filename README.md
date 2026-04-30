@@ -44,20 +44,58 @@ If you don't have Jupyter set up, follow the installation instructions [here](ht
 $ jupyter notebook
 ```
 
-### Setting up env variables
-Briefly going over how to set up environment variables. 
-#### Mac/Linux/WSL
+### Setting up environment variables
+
+#### Recommended: Centralized .env file
+
+The easiest way to configure your environment is to create a single `.env` file at the root of the repository:
+
+1. Create a `.env` file in the `langchain-academy` directory:
+```
+touch .env
+```
+
+2. Add your API keys to the `.env` file:
+```
+OPENAI_API_KEY=your-openai-api-key-here
+LANGSMITH_API_KEY=your-langsmith-api-key-here
+LANGSMITH_TRACING_V2=true
+LANGSMITH_PROJECT=langchain-academy
+TAVILY_API_KEY=your-tavily-api-key-here
+```
+
+3. The notebooks and Studio will automatically load these variables using `python-dotenv`.
+
+#### Alternative: Manual environment variables
+
+If you prefer to set environment variables manually in your shell session (without a .env file):
+
+**Mac/Linux/WSL:**
 ```
 $ export API_ENV_VAR="your-api-key-here"
 ```
-#### Windows Powershell
+
+**Windows Powershell:**
 ```
 PS> $env:API_ENV_VAR = "your-api-key-here"
 ```
 
 ### Set OpenAI API key
 * If you don't have an OpenAI API key, you can sign up [here](https://openai.com/index/openai-api/).
-*  Set `OPENAI_API_KEY` in your environment 
+* Set `OPENAI_API_KEY` in your environment using one of the methods above
+
+### Model Configuration
+
+The course notebooks and Studio examples use **`gpt-4o-mini`** by default. This model provides:
+- Excellent performance for learning and experimentation
+- Significantly lower cost compared to `gpt-4o` (~60x cheaper)
+- Faster response times
+
+You can find model configuration in:
+- **Notebooks**: Look for `ChatOpenAI(model="gpt-4o-mini")` calls
+- **Studio files**: In `module-X/studio/*.py` files
+
+To use a different model (e.g., `gpt-4o`), simply update the model parameter in the relevant files.
 
 ### Sign up and Set LangSmith API
 * Sign up for LangSmith [here](https://docs.langchain.com/langsmith/create-account-api-key#create-an-account-and-api-key), find out more about LangSmith and how to use it within your workflow [here](https://www.langchain.com/langsmith). 
@@ -94,12 +132,8 @@ You should see the following output:
 
 Open your browser and navigate to the Studio UI: `https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024`.
 
-* To use Studio, you will need to create a .env file with the relevant API keys
-* Run this from the command line to create these files for module 1 to 5, as an example:
-```
-for i in {1..5}; do
-  cp module-$i/studio/.env.example module-$i/studio/.env
-  echo "OPENAI_API_KEY=\"$OPENAI_API_KEY\"" > module-$i/studio/.env
-done
-echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
-```
+**Environment Configuration:**
+
+Studio uses the centralized `.env` file at the repository root. The `langgraph.json` configuration in each module's studio folder is already configured to load from `../../.env`.
+
+No additional environment setup is required if you've created the root `.env` file as described in the "Setting up environment variables" section above.
