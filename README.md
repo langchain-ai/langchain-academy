@@ -103,3 +103,25 @@ for i in {1..5}; do
 done
 echo "TAVILY_API_KEY=\"$TAVILY_API_KEY\"" >> module-4/studio/.env
 ```
+
+## Convenience Script for Linux/Mac
+
+You can setup like above, but you can also use the `setup_env.sh` script to create the .env files for convenience
+
+First, export the necessary environment variables:
+
+```
+export OPENAI_API_KEY=""
+export LANGSMITH_API_KEY=""
+export LANGSMITH_TRACING_V2="true"
+export LANGSMITH_PROJECT="langchain-academy"
+export TAVILY_API_KEY=""
+```
+
+Then, run the provided shell script to set up .env files, in each respected directory automatically:
+
+```
+./scripts/setup_env.sh
+```
+
+This script will create .env files in the studio directories for modules 1-5, populating them with the exported variables.
