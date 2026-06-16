@@ -1,3 +1,4 @@
+# Pin the inmem packages for the time being
 langgraph
 langgraph-prebuilt
 langgraph-sdk
@@ -11,8 +12,13 @@ notebook
 langchain-tavily
 wikipedia
 trustcall
-langgraph-cli[inmem]
-
+# Commented out to prevent pip from resolving development versions
+# langgraph-cli[inmem]
+# Pinned stable versions for the local in-memory dev server
+langgraph-cli==0.4.29
+langgraph-api==0.10.0
+langgraph-runtime-inmem==0.30.0
+#
 aiohttp>=3.13.4
 Pygments>=2.20.0
 cryptography>=46.0.7
