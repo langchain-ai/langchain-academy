@@ -2,17 +2,18 @@ langgraph
 langgraph-prebuilt
 langgraph-sdk
 langgraph-checkpoint-sqlite
-langsmith>=0.7.31
+langsmith
 langchain-community
-langchain-core>=1.2.28
-langchain-openai>=1.1.14
-langchain-text-splitters>=1.1.2
+langchain-core
+langchain-openai
+langchain-google-genai
+langchain-text-splitters
 notebook
 langchain-tavily
 wikipedia
 trustcall
 langgraph-cli[inmem]
 
-aiohttp>=3.13.4
-Pygments>=2.20.0
-cryptography>=46.0.7
+aiohttp
+Pygments
+cryptography

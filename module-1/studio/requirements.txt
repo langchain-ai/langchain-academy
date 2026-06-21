@@ -6,3 +6,4 @@ langchain-openai>=1.1.14
 langchain-text-splitters>=1.1.2
 langsmith>=0.7.31
 aiohttp>=3.13.4
+langchain-google-genai
