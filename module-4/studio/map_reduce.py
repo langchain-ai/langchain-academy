@@ -4,7 +4,7 @@ from typing_extensions import TypedDict
 
 from pydantic import BaseModel
 
-from langchain_openai import ChatOpenAI 
+from langchain_ollama import ChatOllama 
 
 from langgraph.constants import Send
 from langgraph.graph import END, StateGraph, START
