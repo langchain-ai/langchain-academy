@@ -4,7 +4,7 @@ from trustcall import create_extractor
 
 from langchain_core.messages import SystemMessage
 from langchain_core.runnables.config import RunnableConfig
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.store.base import BaseStore
 import configuration

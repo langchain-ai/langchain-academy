@@ -8,7 +8,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_community.document_loaders import WikipediaLoader
 from langchain_tavily import TavilySearch  # updated 1.0
 
-from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama
 
 from langgraph.graph import StateGraph, START, END
 
