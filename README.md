@@ -59,6 +59,56 @@ PS> $env:API_ENV_VAR = "your-api-key-here"
 * If you don't have an OpenAI API key, you can sign up [here](https://openai.com/index/openai-api/).
 *  Set `OPENAI_API_KEY` in your environment 
 
+### Optional: use LangSmith LLM Gateway for chat models
+
+Direct OpenAI access remains the default. If your organization uses
+[LangSmith LLM Gateway](https://docs.langchain.com/langsmith/llm-gateway-direct-model-access),
+you can route the course's `ChatOpenAI` calls through it instead. Install the
+requirements above, which require `langchain-openai>=1.4.1` and
+`langchain-core>=1.5.3`, and configure an OpenAI provider secret and model access
+in your LangSmith workspace.
+
+Before starting Jupyter, set these variables in the terminal that launches it:
+
+```bash
+export LANGSMITH_GATEWAY="true"
+export LANGSMITH_API_KEY="lsv2_..."
+```
+
+For PowerShell:
+
+```powershell
+$env:LANGSMITH_GATEWAY = "true"
+$env:LANGSMITH_API_KEY = "lsv2_..."
+```
+
+Replace the placeholder with your real LangSmith API key. Optionally set
+`LANGSMITH_GATEWAY_API_KEY` to a separate gateway key; otherwise chat calls use
+`LANGSMITH_API_KEY`. The notebook setup cells prompt for the selected credential,
+not an OpenAI key in gateway mode. You do not need to copy a LangSmith key into
+`OPENAI_API_KEY`. Keep a real provider key for any separate direct-provider use.
+
+`LANGSMITH_GATEWAY` accepts `true`, `1`, or `yes`, or a regional gateway root URL
+such as `https://eu.gateway.smith.langchain.com`. The integration adds `/openai/v1`.
+Unset it or use `false`, `0`, `no`, or an empty string to restore direct access.
+Remove `OPENAI_API_BASE` and `OPENAI_BASE_URL` overrides first to avoid conflicting
+endpoint settings. `OPENAI_API_BASE` takes precedence over the flag.
+Restart the kernel and recreate model instances after changing routing. A root
+`.env` is not loaded automatically by these notebooks; use the launching shell or
+set the variables in a notebook cell before constructing the model.
+
+For local Studio, configure the optional gateway entries in each module's
+`studio/.env` instead of supplying an OpenAI key. Module 4 uses the root
+requirements; the other Studio and deployment requirements include the same
+integration minimum. The copy commands below are a direct-provider example and
+do not populate gateway settings. Remote deployments in Module 6 need their own
+runtime environment settings; exporting a local flag does not configure the server.
+
+This setup affects chat model calls, not Tavily search, embeddings, remote API
+access, or other services. Keep their credentials where required. LangSmith
+tracing is independent of gateway routing: disabling tracing does not disable
+Gateway, and `LANGSMITH_ENDPOINT` selects the LangSmith API, not the gateway URL.
+
 ### Sign up and Set LangSmith API
 * Sign up for LangSmith [here](https://docs.langchain.com/langsmith/create-account-api-key#create-an-account-and-api-key), find out more about LangSmith and how to use it within your workflow [here](https://www.langchain.com/langsmith). 
 *  Set `LANGSMITH_API_KEY`, `LANGSMITH_TRACING_V2="true"` `LANGSMITH_PROJECT="langchain-academy"`in your environment 
